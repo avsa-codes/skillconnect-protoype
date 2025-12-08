@@ -1,0 +1,4 @@
+name,email,phone,college,city,skills,availability,portfolio_url,short_bio,seed_type
+Alex Student,alex@example.com,+91 98765 43210,IIT Delhi,Delhi,"React, JavaScript, Python",10-20,https://portfolio.alex.com,Final year CS student,student
+Priya Sharma,priya@example.com,+91 98765 43211,BITS Pilani,Hyderabad,"Data Analysis, Excel, SQL",20+,,Data science enthusiast,student
+Rahul Kumar,rahul@example.com,+91 98765 43212,NIT Trichy,Chennai,"JavaScript, Node.js, MongoDB",<10,,Backend developer,student
