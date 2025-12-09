@@ -16,18 +16,22 @@ interface SkillTagsProps {
 export function SkillTags({ value, onChange, maxTags = 5, placeholder = "Add a skill...", className }: SkillTagsProps) {
   const [inputValue, setInputValue] = useState("")
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault()
-      const newTag = inputValue.trim()
-      if (newTag && !value.includes(newTag) && value.length < maxTags) {
-        onChange([...value, newTag])
-        setInputValue("")
-      }
-    } else if (e.key === "Backspace" && !inputValue && value.length > 0) {
-      onChange(value.slice(0, -1))
+ const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === "Enter" || e.key === ",") {
+    e.preventDefault();
+    e.stopPropagation(); // ← THE FIX
+
+    const newTag = inputValue.trim();
+
+    if (newTag && !value.includes(newTag) && value.length < maxTags) {
+      onChange([...value, newTag]);
+      setInputValue("");
     }
+  } else if (e.key === "Backspace" && !inputValue && value.length > 0) {
+    onChange(value.slice(0, -1));
   }
+};
+
 
   const removeTag = (tagToRemove: string) => {
     onChange(value.filter((tag) => tag !== tagToRemove))
