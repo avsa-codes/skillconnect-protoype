@@ -313,29 +313,28 @@ useEffect(() => {
 
 
   // LOGIN WITH GOOGLE: triggers OAuth redirect
-  const loginWithGoogle = useCallback(
-    async (role?: UserRole): Promise<{ success: boolean; error?: string }> => {
-      try {
-        // We attach role info in redirect query so server-side or client-side can take action after return
-        const redirectTo = `${window.location.origin}/auth`; // Supabase will return here after OAuth
-        const query = role ? `?role=${role}` : "";
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: { redirectTo: redirectTo + query },
-        });
-        if (error) {
-          console.error("signInWithOAuth error:", error);
-          return { success: false, error: error.message };
-        }
-        // The browser will redirect; return success true for the caller, although app will navigate away
-        return { success: true };
-      } catch (err: any) {
-        console.error("loginWithGoogle error:", err);
-        return { success: false, error: err?.message || "Google login failed" };
-      }
-    },
-    [supabase]
-  );
+const loginWithGoogle = useCallback(
+  async (role?: UserRole): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback?role=${role ?? ""}`;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,  // 👈 THIS IS CORRECT FORMAT
+          skipBrowserRedirect: false,
+        },
+      });
+
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+  []
+);
+
 
   // SIGNUP: create account and profile
 // SIGNUP: create account + profile table row
