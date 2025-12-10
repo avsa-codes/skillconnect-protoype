@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Loader2 } from "lucide-react";
 
@@ -11,21 +11,26 @@ export default function OAuthCallbackPage() {
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
-    async function handleOAuth() {
+    async function finishOAuth() {
       const code = searchParams.get("code");
-      const role = searchParams.get("role") || "student";
-
       if (!code) return;
 
-      // 1️⃣ EXCHANGE CODE → CREATE SESSION
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      console.log("OAuth returned with code:", code);
+
+      // 🔥 1. EXCHANGE THE CODE INTO A SESSION (MANDATORY)
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
-        console.error("OAuth exchange failed:", error.message);
+        console.error("OAuth Exchange Error:", error);
         return;
       }
 
-      // 2️⃣ REDIRECT USER
+      console.log("Supabase login success:", data);
+
+      // 🔥 2. Read the role from URL
+      const role = searchParams.get("role") || "student";
+
+      // 🔥 3. Redirect based on role
       if (role === "student") {
         router.replace("/student/onboarding");
       } else {
@@ -33,12 +38,12 @@ export default function OAuthCallbackPage() {
       }
     }
 
-    handleOAuth();
-  }, []);
+    finishOAuth();
+  }, [searchParams]);
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   );
 }
