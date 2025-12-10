@@ -251,105 +251,87 @@ const handleRegister = async (e: React.FormEvent) => {
     // ----------------------------------------------------------
   // GOOGLE OAUTH → POST LOGIN HANDLER
   // ----------------------------------------------------------
-  useEffect(() => {
-    async function handleOAuthReturn() {
-      if (!isAuthenticated || !user) return;
+useEffect(() => {
+  async function handleOAuthReturn() {
+    // Check Supabase session directly (necessary for OAuth)
+    const supabase = createSupabaseBrowserClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
-      const roleParam = searchParams.get("role");
-      if (!roleParam) return; // No Google OAuth role → ignore
+    if (!session?.user) return;
 
-      const supabase = createSupabaseBrowserClient();
+    const roleParam = searchParams.get("role");
+    if (!roleParam) return;
 
-      try {
-        // 1) Fetch latest user metadata from Supabase
-        const {
-          data: { user: freshUser },
-        } = await supabase.auth.getUser();
+    try {
+      const freshUser = session.user;
+      const meta = freshUser.user_metadata || {};
+      const role = roleParam === "organization_user" ? "organization_user" : "student";
 
-        if (!freshUser) return;
-
-        const meta = (freshUser.user_metadata || {}) as Record<string, any>;
-        const role =
-          roleParam === "organization_user" ? "organization_user" : "student";
-
-        // 2) Ensure SC-ID exists
-        let scId = meta.skillconnect_id;
-        if (!scId) {
-          scId = `SC-${freshUser.id.replace(/-/g, "").slice(-6).toUpperCase()}`;
-
-          await supabase.auth.updateUser({
-            data: {
-              skillconnect_id: scId,
-              role,
-              profile_complete: false,
-            },
-          });
-        }
-
-        // 3) Ensure profile table row exists
-        if (role === "student") {
-          const { data: row } = await supabase
-            .from("student_profiles")
-            .select("user_id")
-            .eq("user_id", freshUser.id)
-            .maybeSingle();
-
-          if (!row) {
-            await supabase.from("student_profiles").insert([
-              {
-                user_id: freshUser.id,
-                full_name: meta.full_name || freshUser.email,
-                email: freshUser.email,
-                profile_strength: 0,
-              },
-            ]);
-          }
-        } else {
-          // organization_user
-          const { data: row } = await supabase
-            .from("organization_profiles")
-            .select("user_id")
-            .eq("user_id", freshUser.id)
-            .maybeSingle();
-
-          if (!row) {
-            await supabase.from("organization_profiles").insert([
-              {
-                user_id: freshUser.id,
-                company_name: meta.full_name || freshUser.email,
-                contact_person: meta.full_name || "",
-                email: freshUser.email,
-                profile_strength: 0,
-              },
-            ]);
-          }
-        }
-
-        // 4) Force local refresh via updateProfile()
-        // (so isFirstLogin/profileComplete update locally)
+      // Ensure SC-ID exists
+      let scId = meta.skillconnect_id;
+      if (!scId) {
+        scId = `SC-${freshUser.id.replace(/-/g, "").slice(-6).toUpperCase()}`;
         await supabase.auth.updateUser({
-          data: { profile_complete: false },
+          data: {
+            skillconnect_id: scId,
+            role,
+            profile_complete: false,
+          },
         });
-
-        // You already have updateProfile from useAuth()
-        if (typeof updateProfile === "function") {
-          await updateProfile({ profileComplete: false });
-        }
-
-        // 5) Redirect based on role
-        if (role === "student") {
-          router.push("/student/onboarding");
-        } else {
-          router.push("/org/profile");
-        }
-      } catch (err) {
-        console.error("OAuth handler error:", err);
-        toast.error("Google login finished, but profile setup failed.");
       }
-    }
 
-    handleOAuthReturn();
-  }, [isAuthenticated, user, searchParams, router]);
+      // Ensure profile row exists
+      if (role === "student") {
+        const { data: row } = await supabase
+          .from("student_profiles")
+          .select("user_id")
+          .eq("user_id", freshUser.id)
+          .maybeSingle();
+
+        if (!row) {
+          await supabase.from("student_profiles").insert([
+            {
+              user_id: freshUser.id,
+              full_name: meta.full_name || freshUser.email,
+              email: freshUser.email,
+              profile_strength: 0,
+            },
+          ]);
+        }
+
+        router.push("/student/onboarding");
+        return;
+      }
+
+      // Organization user
+      const { data: orgRow } = await supabase
+        .from("organization_profiles")
+        .select("user_id")
+        .eq("user_id", freshUser.id)
+        .maybeSingle();
+
+      if (!orgRow) {
+        await supabase.from("organization_profiles").insert([
+          {
+            user_id: freshUser.id,
+            company_name: meta.full_name || freshUser.email,
+            contact_person: meta.full_name || "",
+            email: freshUser.email,
+            profile_strength: 0,
+          },
+        ]);
+      }
+
+      router.push("/org/profile");
+    } catch (err) {
+      console.error("OAuth handler error:", err);
+      toast.error("Google login finished, but profile setup failed.");
+    }
+  }
+
+  handleOAuthReturn();
+}, [searchParams, router]);
+
 
 
   return (
