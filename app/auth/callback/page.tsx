@@ -17,25 +17,18 @@ export default function OAuthCallbackPage() {
 
       console.log("OAuth returned with code:", code);
 
-      // 🔥 1. EXCHANGE THE CODE INTO A SESSION (MANDATORY)
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      // 1️⃣ Exchange code for a session
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error("OAuth Exchange Error:", error);
         return;
       }
 
-      console.log("Supabase login success:", data);
+      console.log("Session established!");
 
-      // 🔥 2. Read the role from URL
-      const role = searchParams.get("role") || "student";
-
-      // 🔥 3. Redirect based on role
-      if (role === "student") {
-        router.replace("/student/onboarding");
-      } else {
-        router.replace("/org/profile");
-      }
+      // 2️⃣ Redirect to onboarding or profile
+      router.replace("/auth/first-login");
     }
 
     finishOAuth();
