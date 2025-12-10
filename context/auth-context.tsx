@@ -316,13 +316,10 @@ useEffect(() => {
 const loginWithGoogle = useCallback(
   async (role?: UserRole): Promise<{ success: boolean; error?: string }> => {
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback?role=${role ?? ""}`;
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://skillconnect-prototype.vercel.app/auth?type=student",  // 👈 THIS IS CORRECT FORMAT
-          skipBrowserRedirect: false,
+          redirectTo: `${window.location.origin}/auth?oauth=google&role=${role ?? ""}`,
         },
       });
 
@@ -332,8 +329,9 @@ const loginWithGoogle = useCallback(
       return { success: false, error: err.message };
     }
   },
-  []
+  [supabase]
 );
+
 
 
   // SIGNUP: create account and profile
