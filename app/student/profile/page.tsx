@@ -230,6 +230,40 @@ const uploadCertificateImmediately = async (certId: string, file: File) => {
   loadProfile()
 }, [user])
  
+//PROFILE STRENGTH CALCULATOR 
+function calculateProfileStrength(data: any) {
+  let total = 15;
+  let filled = 0;
+
+  const check = (value: any) =>
+    value !== null &&
+    value !== undefined &&
+    value !== "" &&
+    !(Array.isArray(value) && value.length === 0);
+
+  if (check(data.full_name)) filled++;
+  if (check(data.phone)) filled++;
+  if (check(data.college)) filled++;
+  if (check(data.city)) filled++;
+  if (check(data.skills)) filled++;
+  if (check(data.availability)) filled++;
+  if (check(data.portfolio_url)) filled++;
+  if (check(data.bio)) filled++;
+  if (check(data.education)) filled++;
+  if (check(data.bank_account)) filled++;
+  if (check(data.ifsc_code)) filled++;
+  if (check(data.resume_url)) filled++;
+  if (check(data.avatar_url)) filled++;
+  if (check(data.experiences)) filled++;
+  if (check(data.certificates)) filled++;
+
+  return Math.round((filled / total) * 100);
+}
+
+
+
+
+
 
 const handleSave = async () => {
   if (!user) return;
@@ -294,6 +328,30 @@ const handleSave = async () => {
     });
   }
 
+
+
+  const strength = calculateProfileStrength({
+  full_name: formData.fullName,
+  phone: formData.phone,
+  college: formData.college,
+  city: formData.city,
+  skills: formData.skills,
+  availability: formData.availability,
+  portfolio_url: formData.portfolioUrl,
+  bio: formData.bio,
+  education: formData.education,
+  bank_account: formData.bankAccount,
+  ifsc_code: formData.ifscCode,
+  resume_url: formData.resumeUrl,
+  avatar_url: avatarUrl,
+  experiences,
+  certificates: uploadedCertificates,
+});
+
+
+
+
+
   /* ---------------- SAVE EVERYTHING EXCEPT RESUME ---------------- */
   const { error } = await supabase
     .from("student_profiles")
@@ -312,9 +370,12 @@ const handleSave = async () => {
       avatar_url: avatarUrl,
       certificates: uploadedCertificates,
       experiences: experiences,
+      profile_strength: strength, 
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", user.id);
+
+    toast.success(`Profile updated! Strength: ${strength}%`);
 
   if (error) {
     toast.error("Failed to save changes");

@@ -50,6 +50,17 @@ export default function StudentDashboardPage() {
   // -----------------------------------------------------------
   // 1️⃣ LOAD PROFILE
   // -----------------------------------------------------------
+
+
+
+  function getProfileStrengthStatus(strength: number) {
+  if (strength < 40) return { label: "Weak profile", tip: "Add more details to improve", color: "text-red-500" };
+  if (strength < 70) return { label: "Average profile", tip: "Complete missing sections", color: "text-yellow-500" };
+  return { label: "Good profile", tip: "Reach 100% for best visibility", color: "text-green-600" };
+}
+
+
+
   useEffect(() => {
     if (!user) return;
 
@@ -388,14 +399,26 @@ export default function StudentDashboardPage() {
 
               <CardContent>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-xl font-bold text-primary">85%</span>
-                  </div>
+                 {(() => {
+  const strength = studentProfile?.profile_strength || 0;
+  const status = getProfileStrengthStatus(strength);
 
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Good profile</p>
-                    <p className="text-xs text-muted-foreground">Add portfolio to reach 100%</p>
-                  </div>
+  return (
+    <div className="flex items-center gap-4 mb-3">
+      {/* Strength Circle */}
+      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+        <span className="text-xl font-bold text-primary">{strength}%</span>
+      </div>
+
+      {/* Status Text */}
+      <div className="flex-1">
+        <p className={`text-sm font-medium ${status.color}`}>{status.label}</p>
+        <p className="text-xs text-muted-foreground">{status.tip}</p>
+      </div>
+    </div>
+  );
+})()}
+
                 </div>
 
                 <Button variant="outline" size="sm" className="w-full rounded-xl" asChild>

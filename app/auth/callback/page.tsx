@@ -13,22 +13,36 @@ export default function OAuthCallbackPage() {
   useEffect(() => {
     async function finishOAuth() {
       const code = searchParams.get("code");
+      const role = searchParams.get("role") || "student";
+
       if (!code) return;
 
-      console.log("OAuth returned with code:", code);
+      console.log("OAuth code:", code);
 
-      // 1️⃣ Exchange code for a session
+      // 1️⃣ Exchange code → session
       const { error } = await supabase.auth.exchangeCodeForSession(code);
-
       if (error) {
-        console.error("OAuth Exchange Error:", error);
+        console.error("OAuth error:", error);
         return;
       }
 
-      console.log("Session established!");
+      // 2️⃣ Force refresh so AuthContext gets updated IMMEDIATELY
+      await supabase.auth.getSession();
 
-      // 2️⃣ Redirect to onboarding or profile
-      router.replace("/auth/first-login");
+      // 3️⃣ Set metadata role immediately (Supabase does NOT do this itself)
+      await supabase.auth.updateUser({
+        data: {
+          role: role,
+          profile_complete: false,
+        },
+      });
+
+      // 4️⃣ Redirect based on selected role
+      if (role === "student") {
+        router.replace("/student/onboarding");
+      } else {
+        router.replace("/org/profile");
+      }
     }
 
     finishOAuth();

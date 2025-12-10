@@ -555,79 +555,145 @@ export default function AdminStudentsPage() {
 
 
         {/* EDIT MODAL */}
-        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-          <DialogContent>
-            {selectedStudent && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>Edit Student</DialogTitle>
-                  <DialogDescription>
-                    {selectedStudent.skillconnect_id}
-                  </DialogDescription>
-                </DialogHeader>
+        {/* EDIT MODAL */}
+<Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+  <DialogContent>
+    {selectedStudent && (
+      <>
+        <DialogHeader>
+          <DialogTitle>Edit Student</DialogTitle>
+          <DialogDescription>
+            {selectedStudent.skillconnect_id}
+          </DialogDescription>
+        </DialogHeader>
 
-                <div className="space-y-4 py-4">
-                  <div>
-                    <Label>Full Name</Label>
-                    <Input
-                      defaultValue={selectedStudent.full_name}
-                      className="mt-1"
-                    />
-                  </div>
+        <div className="space-y-4 py-4">
+          <div>
+            <Label>Full Name</Label>
+            <Input
+              value={selectedStudent.full_name}
+              onChange={(e) =>
+                setSelectedStudent({ ...selectedStudent, full_name: e.target.value })
+              }
+              className="mt-1"
+            />
+          </div>
 
-                  <div>
-                    <Label>Email</Label>
-                    <Input
-                      defaultValue={selectedStudent.email}
-                      className="mt-1"
-                    />
-                  </div>
+          <div>
+            <Label>Email</Label>
+            <Input
+              value={selectedStudent.email}
+              onChange={(e) =>
+                setSelectedStudent({ ...selectedStudent, email: e.target.value })
+              }
+              className="mt-1"
+            />
+          </div>
 
-                  <div>
-                    <Label>Phone</Label>
-                    <Input
-                      defaultValue={selectedStudent.phone || ""}
-                      className="mt-1"
-                    />
-                  </div>
+          <div>
+            <Label>Phone</Label>
+            <Input
+              value={selectedStudent.phone || ""}
+              onChange={(e) =>
+                setSelectedStudent({ ...selectedStudent, phone: e.target.value })
+              }
+              className="mt-1"
+            />
+          </div>
 
-                  <div>
-                    <Label>College</Label>
-                    <Input
-                      defaultValue={selectedStudent.college || ""}
-                      className="mt-1"
-                    />
-                  </div>
+          <div>
+            <Label>College</Label>
+            <Input
+              value={selectedStudent.college || ""}
+              onChange={(e) =>
+                setSelectedStudent({ ...selectedStudent, college: e.target.value })
+              }
+              className="mt-1"
+            />
+          </div>
 
-                  <div className="flex gap-2 pt-4 border-t">
-                    <Button variant="outline" className="flex-1 bg-transparent">
-                      <Key className="mr-2 h-4 w-4" />
-                      Reset Password
-                    </Button>
+          {/* ⭐ NEW RATING FIELD */}
+          <div>
+            <Label>Rating (0 - 5)</Label>
+            <Input
+  type="number"
+  min="0"
+  max="5"
+  step="0.1"
+  value={selectedStudent.rating !== null && selectedStudent.rating !== undefined 
+    ? String(selectedStudent.rating) 
+    : ""}
+  onChange={(e) =>
+    setSelectedStudent({
+      ...selectedStudent,
+      rating: e.target.value === "" ? null : parseFloat(e.target.value)
+    })
+  }
+  className="mt-1"
+/>
 
-                    <Button
-                      variant="outline"
-                      className="flex-1 text-destructive hover:text-destructive bg-transparent"
-                    >
-                      <Ban className="mr-2 h-4 w-4" />
-                      Block User
-                    </Button>
-                  </div>
-                </div>
+          </div>
 
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowEditModal(false)}>
-                    Cancel
-                  </Button>
+          <div className="flex gap-2 pt-4 border-t">
+            <Button variant="outline" className="flex-1 bg-transparent">
+              <Key className="mr-2 h-4 w-4" />
+              Reset Password
+            </Button>
 
-                  <Button onClick={() => setShowEditModal(false)}>
-                    Save Changes
-                  </Button>
-                </DialogFooter>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
+            <Button
+              variant="outline"
+              className="flex-1 text-destructive hover:text-destructive bg-transparent"
+            >
+              <Ban className="mr-2 h-4 w-4" />
+              Block User
+            </Button>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+
+          {/* SAVE BUTTON */}
+          <Button
+            onClick={async () => {
+              const { error } = await supabase
+                .from("student_profiles")
+                .update({
+                  full_name: selectedStudent.full_name,
+                  email: selectedStudent.email,
+                  phone: selectedStudent.phone,
+                  college: selectedStudent.college,
+                  rating: selectedStudent.rating,   // ⭐ SAVE RATING
+                })
+                .eq("user_id", selectedStudent.user_id);
+
+              if (error) {
+                console.error(error);
+                alert("Failed to update student");
+                return;
+              }
+
+              // Refresh table
+              const { data } = await supabase
+                .from("student_profiles")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+              setStudents(data || []);
+
+              setShowEditModal(false);
+            }}
+          >
+            Save Changes
+          </Button>
+        </DialogFooter>
+      </>
+    )}
+  </DialogContent>
+</Dialog>
+
       </div>
     </DashboardLayout>
   );
