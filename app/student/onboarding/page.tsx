@@ -236,11 +236,17 @@ export default function StudentOnboardingPage() {
                 <div className="space-y-2">
                   <Label>Top Skills * (up to 3)</Label>
                   <SkillTags
-                    value={formData.skills}
-                    onChange={(skills) => setFormData({ ...formData, skills })}
-                    maxTags={3}
-                    placeholder="Add up to 3 skills — use commas to separate"
-                  />
+  value={formData.skills}
+  onChange={(skills: string[]) =>
+    setFormData({
+      ...formData,
+      skills: Array.isArray(skills) ? skills : []
+    })
+  }
+  maxTags={3}
+  placeholder="Add up to 3 skills — use commas or Enter"
+/>
+
                 </div>
 
                 <div className="space-y-2">

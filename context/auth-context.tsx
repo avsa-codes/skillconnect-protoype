@@ -322,7 +322,7 @@ const loginWithGoogle = useCallback(
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://skillconnect-prototype.vercel.app/auth/callback",
+          redirectTo: redirectUrl,
         },
       });
 
@@ -339,6 +339,7 @@ const loginWithGoogle = useCallback(
   },
   [supabase]
 );
+
 
 
 
