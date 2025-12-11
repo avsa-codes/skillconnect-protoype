@@ -37,6 +37,7 @@ import { toast } from "sonner";
 export default function StudentDashboardPage() {
   const supabase = createSupabaseBrowserClient();
   const { user } = useAuth();
+  const [completedTasks, setCompletedTasks] = useState<any[]>([]);
 
   const [studentProfile, setStudentProfile] = useState<any | null>(null);
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
@@ -132,6 +133,17 @@ export default function StudentDashboardPage() {
       .eq("status", "active");
 
     setActiveTasks(tasksActive || []);
+
+
+    // Completed tasks
+const { data: tasksCompleted } = await supabase
+.from("tasks")
+.select("*")
+.contains("assigned_students", [studentProfile.user_id])
+.eq("status", "completed");
+
+setCompletedTasks(tasksCompleted || []);
+
 
     setLoading(false);
   };
@@ -388,6 +400,59 @@ export default function StudentDashboardPage() {
                 </Card>
               )}
             </section>
+
+            {/* COMPLETED TASKS SECTION */}
+<section className="space-y-4">
+  <h2 className="text-lg sm:text-xl font-semibold">Completed Tasks</h2>
+
+  {completedTasks.length > 0 ? (
+    completedTasks.map((task) => (
+      <Card key={task.id} className="rounded-2xl">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold">{task.title}</h3>
+                <BadgeStatus status="completed" />
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-2">
+                {task.organization_name}
+              </p>
+
+              {/* Rating + Feedback */}
+              <div className="text-sm">
+                <p className="font-medium">⭐ {task.org_rating ?? "-"} / 5</p>
+                {task.org_feedback && (
+                  <p className="text-muted-foreground mt-1 line-clamp-2">
+                    “{task.org_feedback}”
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button variant="outline" size="sm" className="rounded-xl" asChild>
+              <Link href={`/student/tasks/${task.id}`}>
+                View Details <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ))
+  ) : (
+    <Card className="rounded-2xl">
+      <CardContent className="p-6">
+        <EmptyState
+          icon={<Star className="h-8 w-8 text-muted-foreground" />}
+          title="No completed tasks yet"
+          description="After completing tasks, your ratings and feedback will appear here."
+        />
+      </CardContent>
+    </Card>
+  )}
+</section>
+
           </div>
 
           {/* RIGHT SIDEBAR */}

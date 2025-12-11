@@ -206,6 +206,39 @@ export default function TaskDetailsPage() {
           </Card>
         </div>
 
+
+{/*Feedback Section*/ }
+
+{task.status === "completed" && (
+  <Card className="mt-6 border-green-200 bg-green-50">
+    <CardHeader>
+      <CardTitle>Your Performance</CardTitle>
+      <CardDescription>Feedback from the Organization</CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-3">
+      <div>
+        <p className="text-sm text-muted-foreground">Rating</p>
+        <p className="font-semibold text-lg">⭐ {task.org_rating}/5</p>
+      </div>
+
+      <div>
+        <p className="text-sm text-muted-foreground">Feedback</p>
+        <p>{task.org_feedback || "No feedback available"}</p>
+      </div>
+
+      <div>
+        <p className="text-sm text-muted-foreground">Completed On</p>
+        <p>{new Date(task.completed_at).toLocaleDateString()}</p>
+      </div>
+    </CardContent>
+  </Card>
+)}
+
+
+
+
+
         {/* FULL BRIEF */}
         <Card className="rounded-2xl">
           <CardHeader>
