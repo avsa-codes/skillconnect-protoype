@@ -17,20 +17,9 @@ export function SkillTags({ value, onChange, maxTags = 5, placeholder = "Add a s
   const [inputValue, setInputValue] = useState("")
 
 const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-  const key = e.key;
-
-  const isComma =
-    key === "," ||
-    key === "Comma" ||
-    key === "Unidentified";
-
-  const isSubmitKey =
-    key === "Enter" ||
-    isComma ||
-    key === "Tab"; // optional
-
-  if (isSubmitKey) {
+  if (e.key === "Enter" || e.key === ",") {
     e.preventDefault();
+
     const newTag = inputValue.trim();
 
     if (
@@ -43,10 +32,11 @@ const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     }
   }
 
-  if (key === "Backspace" && !inputValue && value.length > 0) {
+  if (e.key === "Backspace" && !inputValue && value.length > 0) {
     onChange(value.slice(0, -1));
   }
 };
+
 
 
 
