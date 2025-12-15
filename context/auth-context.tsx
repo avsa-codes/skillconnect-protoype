@@ -83,26 +83,27 @@ async function buildUserFromSupabase(
 ): Promise<User> {
   const metadata = (authUser.user_metadata || {}) as Record<string, any>;
   const role: UserRole = (metadata.role as UserRole) || "student";
-  const skillConnectId: string | undefined =
+  const skillConnectId =
     (metadata.skillconnect_id as string) || undefined;
   const isFirstLogin = metadata.must_change_password === true;
 
-  // fetch profile from student_profiles or organization_profiles
-  let profileComplete = false;
-  let fullName: string | undefined = metadata.full_name || metadata.name || undefined;
+  // 🔥 SOURCE OF TRUTH
+  let profileComplete = metadata.profile_complete === true;
+
+  let fullName: string | undefined =
+    metadata.full_name || metadata.name || undefined;
   let avatarUrl: string | null = metadata.avatar_url || null;
 
   try {
     if (role === "student") {
       const { data: studentProfile } = await supabase
         .from("student_profiles")
-        .select("full_name, profile_strength")
+        .select("full_name")
         .eq("user_id", authUser.id)
         .maybeSingle();
 
-      if (studentProfile) {
-        profileComplete = true; // if a row exists, consider profile created (you can do stricter checks)
-        if (!fullName && (studentProfile as any).full_name) fullName = (studentProfile as any).full_name;
+      if (studentProfile && !fullName) {
+        fullName = (studentProfile as any).full_name;
       }
     } else if (role === "organization_user") {
       const { data: orgProfile } = await supabase
@@ -111,13 +112,11 @@ async function buildUserFromSupabase(
         .eq("user_id", authUser.id)
         .maybeSingle();
 
-      if (orgProfile) {
-        profileComplete = true;
-        if (!fullName && (orgProfile as any).company_name) fullName = (orgProfile as any).company_name;
+      if (orgProfile && !fullName) {
+        fullName = (orgProfile as any).company_name;
       }
     }
   } catch (e) {
-    // ignore — non-fatal
     console.warn("Failed to fetch profile row:", e);
   }
 
@@ -132,6 +131,7 @@ async function buildUserFromSupabase(
     profileComplete,
   };
 }
+
 
 /**
  * AuthProvider implementation using Supabase
