@@ -118,8 +118,20 @@ if (isAdmin || hasRole(["admin", "super_admin"])) return adminNavItems;
 
   const isAdmin = adminSession === "super_admin";
 
-if (!isAuthenticated && !isAdmin) {
-  return null; // wait until redirect happens
+
+if (!user && !isAdmin) {
+  return null;
+}
+
+
+// 🚫 Student must complete onboarding before dashboard
+if (
+  user &&
+  user.role === "student" &&
+  user.profileComplete === false
+) {
+  router.replace("/student/onboarding");
+  return null;
 }
 
 

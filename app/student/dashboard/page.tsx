@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
 import { BadgeStatus } from "@/components/ui/badge-status";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useRouter } from "next/navigation";
+
 
 import {
   Dialog,
@@ -43,6 +45,8 @@ export default function StudentDashboardPage() {
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
 
   const [selectedOffer, setSelectedOffer] = useState<any | null>(null);
   const [confirmAction, setConfirmAction] =
@@ -59,6 +63,15 @@ export default function StudentDashboardPage() {
   if (strength < 70) return { label: "Average profile", tip: "Complete missing sections", color: "text-yellow-500" };
   return { label: "Good profile", tip: "Reach 100% for best visibility", color: "text-green-600" };
 }
+
+
+
+
+useEffect(() => {
+  if (user && user.role === "student" && user.profileComplete === false) {
+    router.replace("/student/onboarding");
+  }
+}, [user]);
 
 
 
@@ -199,15 +212,20 @@ setCompletedTasks(tasksCompleted || []);
   // -------------------------------------
   // LOADING STATE
   // -------------------------------------
-  if (loading) {
-    return (
-      <DashboardLayout allowedRoles={["student"]}>
-        <div className="p-10 text-center text-muted-foreground">
-          Loading dashboard…
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <DashboardLayout allowedRoles={["student"]}>
+  //       <div className="p-10 text-center text-muted-foreground">
+  //         Loading dashboard…
+  //       </div>
+  //     </DashboardLayout>
+  //   );
+  // }
+
+  if (!user) {
+  return null; // auth will handle redirect
+}
+
 
   // -------------------------------------
   // UI
