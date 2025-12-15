@@ -395,10 +395,20 @@ window.location.href = "/student/dashboard";
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
-                  <Button onClick={handleSubmit} className="flex-1 rounded-xl" disabled={isLoading}>
+                  {/* <Button onClick={handleSubmit} className="flex-1 rounded-xl" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Complete Profile
-                  </Button>
+                  </Button> */}
+                  <Button
+  type="button"          // 🔥 THIS IS THE FIX
+  onClick={handleSubmit}
+  className="flex-1 rounded-xl"
+  disabled={isLoading}
+>
+  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+  Complete Profile
+</Button>
+
                 </div>
               </CardContent>
             </>
