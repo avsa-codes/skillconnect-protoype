@@ -49,6 +49,23 @@ function AuthContent() {
   const [acceptTerms, setAcceptTerms] = useState(false)
 
 
+
+
+  useEffect(() => {
+  if (!user || !isAuthenticated) return;
+
+  if (user.role === "student" && user.profileComplete === false) {
+    router.replace("/student/onboarding");
+    return;
+  }
+
+  if (user.role === "student" && user.profileComplete === true) {
+    router.replace("/student/dashboard");
+    return;
+  }
+}, [user, isAuthenticated]);
+
+
   
   useEffect(() => {
     const type = searchParams.get("type")

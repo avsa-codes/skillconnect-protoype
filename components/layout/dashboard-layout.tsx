@@ -80,12 +80,21 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps) {
+
+  
   const { user, isAuthenticated, isLoading, logout, hasRole } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
 const [adminSession, setAdminSession] = useState<null | string>(null);
+
+console.log("🧠 DashboardLayout", {
+  user,
+  isAuthenticated,
+  isLoading,
+  pathname,
+});
 
 useEffect(() => {
   // read admin flag safely on client
@@ -133,15 +142,9 @@ if (!isAuthenticated && !isAdmin) {
 
 
 
+
 // 🚫 Student must complete onboarding before dashboard
-if (
-  user &&
-  user.role === "student" &&
-  user.profileComplete === false
-) {
-  router.replace("/student/onboarding");
-  return null;
-}
+
 
 
   

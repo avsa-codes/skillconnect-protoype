@@ -37,8 +37,13 @@ import {
 import { toast } from "sonner";
 
 export default function StudentDashboardPage() {
+  
   const supabase = createSupabaseBrowserClient();
   const { user } = useAuth();
+
+  useEffect(() => {
+  console.log("📊 StudentDashboard mounted", user);
+}, [user]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
 
   const [studentProfile, setStudentProfile] = useState<any | null>(null);
@@ -230,712 +235,704 @@ setCompletedTasks(tasksCompleted || []);
   // -------------------------------------
   // UI
   // -------------------------------------
-//   return (
-//     <DashboardLayout allowedRoles={["student"]}>
-//       <div className="space-y-8 pb-10 px-2 sm:px-4 lg:px-0">
-//         {/* HEADER */}
-//         <div className="space-y-1">
-//           <h1 className="text-2xl sm:text-3xl font-bold">
-//             Welcome back, {studentProfile?.full_name?.split(" ")[0] || "Student"}!
-//           </h1>
-//           <p className="text-muted-foreground">
-//             Here’s what’s happening with your SkillConnect profile.
-//           </p>
-//         </div>
-
-//         {/* TOP STATS */}
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-//           <StatCard
-//             title="Available Balance"
-//             value={`₹${(studentProfile?.wallet_balance || 0).toLocaleString()}`}
-//             icon={<Wallet className="h-5 w-5" />}
-//           />
-//           <StatCard
-//             title="Active Tasks"
-//             value={activeTasks.length}
-//             icon={<Briefcase className="h-5 w-5" />}
-//           />
-//           <StatCard
-//             title="Pending Offers"
-//             value={pendingOffers.length}
-//             icon={<Clock className="h-5 w-5" />}
-//           />
-//           <StatCard
-//             title="Your Rating"
-//             value={(studentProfile?.rating || 0).toFixed(1)}
-//             description={`${studentProfile?.tasks_completed || 0} tasks completed`}
-//             icon={<Star className="h-5 w-5" />}
-//           />
-//         </div>
-
-//         {/* MAIN GRID */}
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-//           {/* LEFT: OFFERS + TASKS */}
-//           <div className="lg:col-span-2 space-y-6">
-//             {/* PENDING OFFERS */}
-//             <section className="space-y-4">
-//               <div className="flex items-center justify-between">
-//                 <h2 className="text-lg sm:text-xl font-semibold">Pending Offers</h2>
-//                 {pendingOffers.length > 0 && (
-//                   <span className="h-6 w-6 rounded-full bg-primary text-white text-xs flex items-center justify-center">
-//                     {pendingOffers.length}
-//                   </span>
-//                 )}
-//               </div>
-
-//               {pendingOffers.length > 0 ? (
-//                 pendingOffers.map((offer) => (
-//                   <Card key={offer.id} className="rounded-2xl">
-//                     <CardContent className="p-4 sm:p-6">
-//                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-//                         <div className="flex-1">
-//                           <div className="flex items-center gap-2 mb-2">
-//                             <h3 className="font-semibold">
-//                               {offer.task?.title || "Task"}
-//                             </h3>
-//                             <BadgeStatus status={offer.status} />
-//                           </div>
-
-//                           <p className="text-sm text-muted-foreground mb-2">
-//                             {offer.organization?.company_name || "Organization"}
-//                           </p>
-
-//                           <div className="flex gap-3 text-sm">
-//                             <span className="text-primary font-medium">
-//                               {offer.salary ? `₹${offer.salary}` : "-"}
-//                             </span>
-//                             <span className="text-muted-foreground">
-//                               Start:{" "}
-//                               {offer.start_date
-//                                 ? new Date(offer.start_date).toLocaleDateString()
-//                                 : "-"}
-//                             </span>
-//                           </div>
-//                         </div>
-
-//                        <div className="flex flex-col sm:flex-row gap-2">
-//   <Button
-//     variant="outline"
-//     size="sm"
-//     className="rounded-xl"
-//     onClick={() => setSelectedOffer(offer)}
-//   >
-//     View Details
-//   </Button>
-
-//   <Button
-//     variant="outline"
-//     size="sm"
-//     className="rounded-xl"
-//     onClick={() => {
-//       setSelectedOffer(offer);
-//       setConfirmAction("decline");
-//     }}
-//   >
-//     <XCircle className="h-4 w-4 mr-1" />
-//     Decline
-//   </Button>
-
-//   <Button
-//     size="sm"
-//     className="rounded-xl"
-//     onClick={() => {
-//       setSelectedOffer(offer);
-//       setConfirmAction("accept");
-//     }}
-//   >
-//     <CheckCircle className="h-4 w-4 mr-1" />
-//     Accept
-//   </Button>
-// </div>
-
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-//                 ))
-//               ) : (
-//                 <Card className="rounded-2xl">
-//                   <CardContent className="p-6">
-//                     <EmptyState
-//                       icon={<FileText className="h-8 w-8 text-muted-foreground" />}
-//                       title="No offers yet"
-//                       description="When organizations shortlist you, offers will appear here."
-//                     />
-//                   </CardContent>
-//                 </Card>
-//               )}
-//             </section>
-
-//             {/* ACTIVE TASKS */}
-//             <section className="space-y-4">
-//               <h2 className="text-lg sm:text-xl font-semibold">Current Tasks</h2>
-
-//               {activeTasks.length > 0 ? (
-//                 activeTasks.map((task) => (
-//                   <Card
-//   key={task.id}
-//   className="rounded-xl bg-white border border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.06)] transition-all duration-300 overflow-hidden"
-// >
-//   <div className="flex">
-
-//     {/* STATUS STRIP — softer premium orange */}
-//     <div className="w-2 bg-orange-400" />
-
-//     <CardContent className="p-5 flex-1">
-//       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-
-//         {/* LEFT CONTENT */}
-//         <div className="flex-1 min-w-0">
-//           <div className="flex items-start gap-4 mb-3">
-
-//             {/* AVATAR — soft glow, premium */}
-//             <div className="h-12 w-12 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orange-300/40">
-//               {task.title?.[0] || "T"}
-//             </div>
-
-//             <div className="min-w-0">
-//               {/* TITLE */}
-//               <h3 className="font-semibold text-xl truncate text-gray-900 tracking-tight">
-//                 {task.title}
-//               </h3>
-
-//               {/* STATUS */}
-//               <div className="flex items-center mt-1">
-//                 <span className="h-2 w-2 rounded-full bg-orange-400 mr-2 animate-pulse"></span>
-//                 <p className="text-sm font-medium text-orange-600">Active Task</p>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* DATES */}
-//           <p className="text-sm text-gray-500 mt-3 border-t border-gray-100 pt-3">
-//             <span className="font-semibold text-gray-700">Started:</span>{" "}
-//             {task.start_date
-//               ? new Date(task.start_date).toLocaleDateString("en-US", {
-//                   year: "numeric",
-//                   month: "short",
-//                   day: "numeric",
-//                 })
-//               : "N/A"}
-//             <span className="mx-2 text-gray-300">•</span>
-//             <span className="font-semibold text-gray-700">Ends:</span> Ongoing
-//           </p>
-//         </div>
-
-//         {/* TAGS */}
-//         <div className="flex flex-wrap gap-2 lg:justify-end lg:max-w-[40%] mt-2 lg:mt-0">
-//           {(task.skills || []).slice(0, 3).map((s: string) => (
-//             <span
-//               key={s}
-//               className="px-3 py-1 bg-orange-50 text-orange-600 text-xs font-medium rounded-full"
-//             >
-//               {s}
-//             </span>
-//           ))}
-//         </div>
-
-//         {/* BUTTON — premium outline */}
-//         <div className="lg:self-center lg:pl-4">
-//           <Button
-//             variant="outline"
-//             size="lg"
-//             className="rounded-full border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:border-orange-600 transition-all w-full lg:w-auto font-medium"
-//           >
-//             <Link href={`/student/tasks/${task.id}`} className="flex items-center">
-//               View Details
-//               <ArrowRight className="h-4 w-4 ml-2" />
-//             </Link>
-//           </Button>
-//         </div>
-
-//       </div>
-//     </CardContent>
-//   </div>
-// </Card>
-
-//                 ))
-//               ) : (
-//                 <Card className="rounded-2xl">
-//                   <CardContent className="p-6">
-//                     <EmptyState
-//                       icon={<Briefcase className="h-8 w-8 text-muted-foreground" />}
-//                       title="No active tasks"
-//                       description="Accept an offer to start working."
-//                     />
-//                   </CardContent>
-//                 </Card>
-//               )}
-//             </section>
-
-//             {/* COMPLETED TASKS SECTION */}
-// <section className="space-y-4">
-//   <h2 className="text-lg sm:text-xl font-semibold">Completed Tasks</h2>
-
-//   {completedTasks.length > 0 ? (
-//     completedTasks.map((task) => (
-//      <Card
-//   key={task.id}
-//   className="rounded-xl bg-white border border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_26px_rgba(0,0,0,0.05)] transition-all duration-300 overflow-hidden"
-// >
-//   <div className="flex">
-
-//     {/* LEFT SUCCESS STRIP */}
-//     <div className="w-2 bg-green-500" />
-
-//     <CardContent className="p-5 flex-1">
-//       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-
-//         {/* LEFT SECTION */}
-//         <div className="flex-1 min-w-0">
-//           <div className="flex items-start gap-4 mb-3">
-
-//             {/* COMPLETION BADGE */}
-//             <div className="h-12 w-12 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-md shadow-green-300/40">
-//               ✓
-//             </div>
-
-//             <div className="min-w-0">
-//               <h3 className="font-semibold text-xl truncate text-gray-900 tracking-tight">
-//                 {task.title}
-//               </h3>
-
-//               <p className="text-sm font-medium text-green-600 mt-1">
-//                 Completed Successfully
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* RATING */}
-//           <div className="flex items-center gap-2 mt-2">
-//             <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-//             <p className="text-sm font-medium text-gray-700">
-//               {task.org_rating ? `${task.org_rating} / 5` : "Not Rated"}
-//             </p>
-//           </div>
-
-//           {/* FEEDBACK */}
-//           {task.org_feedback && (
-//             <p className="text-sm text-gray-600 mt-3 italic border-l-4 border-green-200 pl-3 leading-relaxed">
-//               “{task.org_feedback}”
-//             </p>
-//           )}
-
-//           {/* COMPLETION DATE */}
-//           <p className="text-xs text-gray-500 mt-4 border-t border-gray-100 pt-3">
-//             Completed on:{" "}
-//             {task.completed_at
-//               ? new Date(task.completed_at).toLocaleDateString("en-US", {
-//                   year: "numeric",
-//                   month: "short",
-//                   day: "numeric",
-//                 })
-//               : "—"}
-//           </p>
-//         </div>
-
-//         {/* VIEW DETAILS BUTTON */}
-//         <div className="lg:self-center lg:pl-4">
-//           <Button
-//             variant="outline"
-//             size="lg"
-//             className="rounded-full border-2 border-green-600 text-green-600 hover:bg-green-50 transition-all w-full lg:w-auto font-medium"
-//             asChild
-//           >
-//             <Link href={`/student/tasks/${task.id}`}>
-//               View Summary
-//               <ArrowRight className="h-4 w-4 ml-2" />
-//             </Link>
-//           </Button>
-//         </div>
-
-//       </div>
-//     </CardContent>
-//   </div>
-// </Card>
-
-//     ))
-//   ) : (
-//     <Card className="rounded-2xl">
-//       <CardContent className="p-6">
-//         <EmptyState
-//           icon={<Star className="h-8 w-8 text-muted-foreground" />}
-//           title="No completed tasks yet"
-//           description="After completing tasks, your ratings and feedback will appear here."
-//         />
-//       </CardContent>
-//     </Card>
-//   )}
-// </section>
-
-//           </div>
-
-//           {/* RIGHT SIDEBAR */}
-//           <div className="space-y-6">
-//             <Card className="rounded-2xl">
-//               <CardHeader className="pb-2">
-//                 <CardTitle className="text-base">Profile Strength</CardTitle>
-//               </CardHeader>
-
-//               <CardContent>
-//                 <div className="flex items-center gap-4 mb-3">
-//                  {(() => {
-//   const strength = studentProfile?.profile_strength || 0;
-//   const status = getProfileStrengthStatus(strength);
-
-//   return (
-//     <div className="flex items-center gap-4 mb-3">
-//       {/* Strength Circle */}
-//       <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-//         <span className="text-xl font-bold text-primary">{strength}%</span>
-//       </div>
-
-//       {/* Status Text */}
-//       <div className="flex-1">
-//         <p className={`text-sm font-medium ${status.color}`}>{status.label}</p>
-//         <p className="text-xs text-muted-foreground">{status.tip}</p>
-//       </div>
-//     </div>
-//   );
-// })()}
-
-//                 </div>
-
-//                 <Button variant="outline" size="sm" className="w-full rounded-xl" asChild>
-//                   <Link href="/student/profile">Update Profile</Link>
-//                 </Button>
-//               </CardContent>
-//             </Card>
-
-//             <Card className="rounded-2xl">
-//               <CardHeader className="pb-2">
-//                 <CardTitle className="text-base">Quick Links</CardTitle>
-//               </CardHeader>
-
-//               <CardContent className="space-y-2">
-//                 <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
-//                   <Link href="/student/profile">Edit Profile</Link>
-//                 </Button>
-
-//                 <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
-//                   {/* <Link href="/student/earnings">View Earnings</Link> */}
-//                 </Button>
-
-//                 <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
-//                   <Link href="/student/settings">Notifications</Link>
-//                 </Button>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </div>
-//       </div>
-
-
-
-
-// {/* OFFER DETAILS MODAL */}
-// <Dialog open={!!selectedOffer && !confirmAction} onOpenChange={() => setSelectedOffer(null)}>
-//   <DialogContent className="rounded-2xl max-w-lg max-h-[80vh] overflow-y-auto">
-//     <DialogHeader>
-//       <DialogTitle>Offer Details</DialogTitle>
-//       <DialogDescription>
-//         Review the full details of this offer.
-//       </DialogDescription>
-//     </DialogHeader>
-
-//    {selectedOffer && (
-//   <div className="space-y-4">
-
-//     {/* TASK SECTION */}
-//     <div className="bg-muted/50 p-4 rounded-xl space-y-2">
-//       <p className="text-xs text-muted-foreground">Task</p>
-//       <p className="font-semibold">{selectedOffer.task?.title}</p>
-
-//       {selectedOffer.task?.short_description && (
-//         <>
-//           <p className="text-xs text-muted-foreground mt-3">Description</p>
-//           <p className="text-sm">{selectedOffer.task.short_description}</p>
-//         </>
-//       )}
-
-//       {selectedOffer.task?.full_brief && (
-//         <>
-//           <p className="text-xs text-muted-foreground mt-3">Full Brief</p>
-//           <p className="text-sm whitespace-pre-wrap">
-//             {selectedOffer.task.full_brief}
-//           </p>
-//         </>
-//       )}
-//     </div>
-
-//     {/* ORGANIZATION */}
-//     <div className="bg-muted/50 p-4 rounded-xl space-y-2">
-//       <p className="text-xs text-muted-foreground">Organization</p>
-//       <p className="font-medium">
-//         {selectedOffer.organization?.company_name}
-//       </p>
-//     </div>
-
-//     {/* SALARY + DATES */}
-//     <div className="bg-muted/50 p-4 rounded-xl space-y-2">
-//       <p className="text-xs text-muted-foreground">Salary</p>
-//       <p className="font-semibold text-primary">₹{selectedOffer.salary}</p>
-
-//       <p className="text-xs text-muted-foreground mt-3">Start Date</p>
-//       <p>{new Date(selectedOffer.start_date).toLocaleDateString()}</p>
-
-//       <p className="text-xs text-muted-foreground mt-3">Sent On</p>
-//       <p>
-//         {selectedOffer.sent_at
-//           ? new Date(selectedOffer.sent_at).toLocaleString()
-//           : "-"}
-//       </p>
-//     </div>
-
-//   </div>
-// )}
-
-
-//     <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
-//       <Button
-//         variant="outline"
-//         onClick={() => setSelectedOffer(null)}
-//         className="rounded-xl w-full sm:w-auto"
-//       >
-//         Close
-//       </Button>
-
-//       <Button
-//         variant="outline"
-//         className="rounded-xl w-full sm:w-auto"
-//         onClick={() => setConfirmAction("decline")}
-//       >
-//         Decline
-//       </Button>
-
-//       <Button
-//         className="rounded-xl w-full sm:w-auto"
-//         onClick={() => setConfirmAction("accept")}
-//       >
-//         Accept
-//       </Button>
-//     </DialogFooter>
-//   </DialogContent>
-// </Dialog>
-
-
-
-
-
-
-
-
-
-
-//       {/* CONFIRMATION DIALOG */}
-// {/* CONFIRMATION DIALOG */}
-// <Dialog
-//   open={!!confirmAction}
-//   onOpenChange={() => {
-//     setConfirmAction(null);
-//     setSelectedOffer(null);
-//   }}
-// >
-//   <DialogContent className="rounded-2xl max-w-lg max-h-[80vh] overflow-y-auto p-0">
-//     <DialogHeader className="px-6 pt-6">
-//       <DialogTitle className="text-xl font-semibold">
-//         {confirmAction === "accept" ? "Accept this offer?" : "Decline this offer?"}
-//       </DialogTitle>
-//       <DialogDescription className="text-sm text-muted-foreground">
-//         {confirmAction === "accept"
-//           ? "Please review the key details carefully before accepting. Once you accept, the organization and admin will be notified."
-//           : "If you decline, the organization and admin will be notified and this slot may be offered to another student."}
-//       </DialogDescription>
-//     </DialogHeader>
-
-//     {selectedOffer && (
-//       <div className="px-6 py-4 space-y-4">
-
-//         {/* TASK OVERVIEW */}
-//         <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
-//           <p className="text-xs text-muted-foreground">Role / Task</p>
-//           <p className="font-medium">
-//             {selectedOffer.task?.title || "Untitled Task"}
-//           </p>
-
-//           {selectedOffer.task?.short_description && (
-//             <p className="text-sm text-muted-foreground">
-//               {selectedOffer.task.short_description}
-//             </p>
-//           )}
-//         </div>
-
-//         {/* ORG + LOCATION + BASIC META */}
-//         <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-3">
-//           <div>
-//             <p className="text-xs text-muted-foreground">Organization</p>
-//             <p className="text-sm font-medium">
-//               {selectedOffer.organization?.company_name || "Unknown Organization"}
-//             </p>
-//           </div>
-
-//           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-//             <div>
-//               <p className="text-xs text-muted-foreground">Weekly Hours</p>
-//               <p className="font-medium">
-//                 {selectedOffer.task?.weekly_hours
-//                   ? `${selectedOffer.task.weekly_hours} hrs/week`
-//                   : "-"}
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-xs text-muted-foreground">Duration</p>
-//               <p className="font-medium">
-//                 {selectedOffer.task?.duration_weeks
-//                   ? `${selectedOffer.task.duration_weeks} weeks`
-//                   : "-"}
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-xs text-muted-foreground">Location</p>
-//               <p className="font-medium">
-//                 {selectedOffer.task?.location || "-"}
-//                 {selectedOffer.task?.city ? ` · ${selectedOffer.task.city}` : ""}
-//               </p>
-//             </div>
-//           </div>
-
-//           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-//             <div>
-//               <p className="text-xs text-muted-foreground">Positions</p>
-//               <p className="font-medium">
-//                 {selectedOffer.task?.positions ?? "-"}
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-xs text-muted-foreground">Payroll Terms</p>
-//               <p className="font-medium">
-//                 {selectedOffer.task?.payroll_terms || "-"}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* SKILLS */}
-//         {Array.isArray(selectedOffer.task?.skills) &&
-//           selectedOffer.task.skills.length > 0 && (
-//             <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
-//               <p className="text-xs text-muted-foreground">Key Skills</p>
-//               <div className="flex flex-wrap gap-2">
-//                 {selectedOffer.task.skills.map((s: string) => (
-//                   <span
-//                     key={s}
-//                     className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs"
-//                   >
-//                     {s}
-//                   </span>
-//                 ))}
-//               </div>
-//             </div>
-//           )}
-
-//         {/* FULL BRIEF (optional, scrollable inside) */}
-//         {selectedOffer.task?.full_brief && (
-//           <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
-//             <p className="text-xs text-muted-foreground">Full Brief</p>
-//             <p className="text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
-//               {selectedOffer.task.full_brief}
-//             </p>
-//           </div>
-//         )}
-
-//         {/* SALARY + DATES */}
-//         <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-3">
-//           <div>
-//             <p className="text-xs text-muted-foreground">Total Stipend / Salary</p>
-//             <p className="font-semibold text-primary">
-//               {selectedOffer.salary ? `₹${selectedOffer.salary}` : "-"}
-//             </p>
-//           </div>
-
-//           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-//             <div>
-//               <p className="text-xs text-muted-foreground">Start Date</p>
-//               <p>
-//                 {selectedOffer.start_date
-//                   ? new Date(selectedOffer.start_date).toLocaleDateString()
-//                   : "-"}
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-xs text-muted-foreground">Offer Sent On</p>
-//               <p>
-//                 {selectedOffer.sent_at
-//                   ? new Date(selectedOffer.sent_at).toLocaleString()
-//                   : "-"}
-//               </p>
-//             </div>
-//           </div>
-
-//           <p className="text-xs text-amber-600 mt-2">
-//             Note: This offer is valid for 24 hours from the time it was sent.
-//           </p>
-//         </div>
-
-//         {/* ATTACHMENTS (if any) */}
-//         {Array.isArray(selectedOffer.task?.attachment_urls) &&
-//           selectedOffer.task.attachment_urls.length > 0 && (
-//             <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
-//               <p className="text-xs text-muted-foreground">Attachments</p>
-//               <ul className="space-y-1 text-sm list-disc list-inside">
-//                 {selectedOffer.task.attachment_urls.map((url: string, idx: number) => (
-//                   <li key={idx}>
-//                     <a
-//                       href={url}
-//                       target="_blank"
-//                       rel="noopener noreferrer"
-//                       className="underline"
-//                     >
-//                       Attachment {idx + 1}
-//                     </a>
-//                   </li>
-//                 ))}
-//               </ul>
-//             </div>
-//           )}
-//       </div>
-//     )}
-
-//     <DialogFooter className="px-6 pb-6 flex flex-col sm:flex-row gap-3">
-//       <Button
-//         variant="outline"
-//         className="rounded-xl w-full"
-//         onClick={() => {
-//           setConfirmAction(null);
-//           setSelectedOffer(null);
-//         }}
-//       >
-//         Cancel
-//       </Button>
-
-//       <Button
-//         variant={confirmAction === "decline" ? "destructive" : "default"}
-//         className="rounded-xl w-full"
-//         onClick={() => handleOfferAction(confirmAction!)}
-//       >
-//         {confirmAction === "accept" ? "Confirm & Accept" : "Confirm & Decline"}
-//       </Button>
-//     </DialogFooter>
-//   </DialogContent>
-// </Dialog>
-
-//     </DashboardLayout>
-//   );
-
-return (
-  <div className="p-10">
-    <h1 className="text-2xl font-bold">Student Dashboard Loaded</h1>
-    <pre>{JSON.stringify(user, null, 2)}</pre>
+  return (
+    <DashboardLayout allowedRoles={["student"]}>
+      <div className="space-y-8 pb-10 px-2 sm:px-4 lg:px-0">
+        {/* HEADER */}
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            Welcome back, {studentProfile?.full_name?.split(" ")[0] || "Student"}!
+          </h1>
+          <p className="text-muted-foreground">
+            Here’s what’s happening with your SkillConnect profile.
+          </p>
+        </div>
+
+        {/* TOP STATS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Available Balance"
+            value={`₹${(studentProfile?.wallet_balance || 0).toLocaleString()}`}
+            icon={<Wallet className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Active Tasks"
+            value={activeTasks.length}
+            icon={<Briefcase className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Pending Offers"
+            value={pendingOffers.length}
+            icon={<Clock className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Your Rating"
+            value={(studentProfile?.rating || 0).toFixed(1)}
+            description={`${studentProfile?.tasks_completed || 0} tasks completed`}
+            icon={<Star className="h-5 w-5" />}
+          />
+        </div>
+
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* LEFT: OFFERS + TASKS */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* PENDING OFFERS */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg sm:text-xl font-semibold">Pending Offers</h2>
+                {pendingOffers.length > 0 && (
+                  <span className="h-6 w-6 rounded-full bg-primary text-white text-xs flex items-center justify-center">
+                    {pendingOffers.length}
+                  </span>
+                )}
+              </div>
+
+              {pendingOffers.length > 0 ? (
+                pendingOffers.map((offer) => (
+                  <Card key={offer.id} className="rounded-2xl">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold">
+                              {offer.task?.title || "Task"}
+                            </h3>
+                            <BadgeStatus status={offer.status} />
+                          </div>
+
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {offer.organization?.company_name || "Organization"}
+                          </p>
+
+                          <div className="flex gap-3 text-sm">
+                            <span className="text-primary font-medium">
+                              {offer.salary ? `₹${offer.salary}` : "-"}
+                            </span>
+                            <span className="text-muted-foreground">
+                              Start:{" "}
+                              {offer.start_date
+                                ? new Date(offer.start_date).toLocaleDateString()
+                                : "-"}
+                            </span>
+                          </div>
+                        </div>
+
+                       <div className="flex flex-col sm:flex-row gap-2">
+  <Button
+    variant="outline"
+    size="sm"
+    className="rounded-xl"
+    onClick={() => setSelectedOffer(offer)}
+  >
+    View Details
+  </Button>
+
+  <Button
+    variant="outline"
+    size="sm"
+    className="rounded-xl"
+    onClick={() => {
+      setSelectedOffer(offer);
+      setConfirmAction("decline");
+    }}
+  >
+    <XCircle className="h-4 w-4 mr-1" />
+    Decline
+  </Button>
+
+  <Button
+    size="sm"
+    className="rounded-xl"
+    onClick={() => {
+      setSelectedOffer(offer);
+      setConfirmAction("accept");
+    }}
+  >
+    <CheckCircle className="h-4 w-4 mr-1" />
+    Accept
+  </Button>
+</div>
+
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="rounded-2xl">
+                  <CardContent className="p-6">
+                    <EmptyState
+                      icon={<FileText className="h-8 w-8 text-muted-foreground" />}
+                      title="No offers yet"
+                      description="When organizations shortlist you, offers will appear here."
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </section>
+
+            {/* ACTIVE TASKS */}
+            <section className="space-y-4">
+              <h2 className="text-lg sm:text-xl font-semibold">Current Tasks</h2>
+
+              {activeTasks.length > 0 ? (
+                activeTasks.map((task) => (
+                  <Card
+  key={task.id}
+  className="rounded-xl bg-white border border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.06)] transition-all duration-300 overflow-hidden"
+>
+  <div className="flex">
+
+    {/* STATUS STRIP — softer premium orange */}
+    <div className="w-2 bg-orange-400" />
+
+    <CardContent className="p-5 flex-1">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+
+        {/* LEFT CONTENT */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-4 mb-3">
+
+            {/* AVATAR — soft glow, premium */}
+            <div className="h-12 w-12 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orange-300/40">
+              {task.title?.[0] || "T"}
+            </div>
+
+            <div className="min-w-0">
+              {/* TITLE */}
+              <h3 className="font-semibold text-xl truncate text-gray-900 tracking-tight">
+                {task.title}
+              </h3>
+
+              {/* STATUS */}
+              <div className="flex items-center mt-1">
+                <span className="h-2 w-2 rounded-full bg-orange-400 mr-2 animate-pulse"></span>
+                <p className="text-sm font-medium text-orange-600">Active Task</p>
+              </div>
+            </div>
+          </div>
+
+          {/* DATES */}
+          <p className="text-sm text-gray-500 mt-3 border-t border-gray-100 pt-3">
+            <span className="font-semibold text-gray-700">Started:</span>{" "}
+            {task.start_date
+              ? new Date(task.start_date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A"}
+            <span className="mx-2 text-gray-300">•</span>
+            <span className="font-semibold text-gray-700">Ends:</span> Ongoing
+          </p>
+        </div>
+
+        {/* TAGS */}
+        <div className="flex flex-wrap gap-2 lg:justify-end lg:max-w-[40%] mt-2 lg:mt-0">
+          {(task.skills || []).slice(0, 3).map((s: string) => (
+            <span
+              key={s}
+              className="px-3 py-1 bg-orange-50 text-orange-600 text-xs font-medium rounded-full"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+
+        {/* BUTTON — premium outline */}
+        <div className="lg:self-center lg:pl-4">
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:border-orange-600 transition-all w-full lg:w-auto font-medium"
+          >
+            <Link href={`/student/tasks/${task.id}`} className="flex items-center">
+              View Details
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+
+      </div>
+    </CardContent>
   </div>
-);
+</Card>
 
+                ))
+              ) : (
+                <Card className="rounded-2xl">
+                  <CardContent className="p-6">
+                    <EmptyState
+                      icon={<Briefcase className="h-8 w-8 text-muted-foreground" />}
+                      title="No active tasks"
+                      description="Accept an offer to start working."
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </section>
+
+            {/* COMPLETED TASKS SECTION */}
+<section className="space-y-4">
+  <h2 className="text-lg sm:text-xl font-semibold">Completed Tasks</h2>
+
+  {completedTasks.length > 0 ? (
+    completedTasks.map((task) => (
+     <Card
+  key={task.id}
+  className="rounded-xl bg-white border border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_26px_rgba(0,0,0,0.05)] transition-all duration-300 overflow-hidden"
+>
+  <div className="flex">
+
+    {/* LEFT SUCCESS STRIP */}
+    <div className="w-2 bg-green-500" />
+
+    <CardContent className="p-5 flex-1">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+
+        {/* LEFT SECTION */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-4 mb-3">
+
+            {/* COMPLETION BADGE */}
+            <div className="h-12 w-12 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-md shadow-green-300/40">
+              ✓
+            </div>
+
+            <div className="min-w-0">
+              <h3 className="font-semibold text-xl truncate text-gray-900 tracking-tight">
+                {task.title}
+              </h3>
+
+              <p className="text-sm font-medium text-green-600 mt-1">
+                Completed Successfully
+              </p>
+            </div>
+          </div>
+
+          {/* RATING */}
+          <div className="flex items-center gap-2 mt-2">
+            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+            <p className="text-sm font-medium text-gray-700">
+              {task.org_rating ? `${task.org_rating} / 5` : "Not Rated"}
+            </p>
+          </div>
+
+          {/* FEEDBACK */}
+          {task.org_feedback && (
+            <p className="text-sm text-gray-600 mt-3 italic border-l-4 border-green-200 pl-3 leading-relaxed">
+              “{task.org_feedback}”
+            </p>
+          )}
+
+          {/* COMPLETION DATE */}
+          <p className="text-xs text-gray-500 mt-4 border-t border-gray-100 pt-3">
+            Completed on:{" "}
+            {task.completed_at
+              ? new Date(task.completed_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "—"}
+          </p>
+        </div>
+
+        {/* VIEW DETAILS BUTTON */}
+        <div className="lg:self-center lg:pl-4">
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full border-2 border-green-600 text-green-600 hover:bg-green-50 transition-all w-full lg:w-auto font-medium"
+            asChild
+          >
+            <Link href={`/student/tasks/${task.id}`}>
+              View Summary
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+
+      </div>
+    </CardContent>
+  </div>
+</Card>
+
+    ))
+  ) : (
+    <Card className="rounded-2xl">
+      <CardContent className="p-6">
+        <EmptyState
+          icon={<Star className="h-8 w-8 text-muted-foreground" />}
+          title="No completed tasks yet"
+          description="After completing tasks, your ratings and feedback will appear here."
+        />
+      </CardContent>
+    </Card>
+  )}
+</section>
+
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="space-y-6">
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Profile Strength</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <div className="flex items-center gap-4 mb-3">
+                 {(() => {
+  const strength = studentProfile?.profile_strength || 0;
+  const status = getProfileStrengthStatus(strength);
+
+  return (
+    <div className="flex items-center gap-4 mb-3">
+      {/* Strength Circle */}
+      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+        <span className="text-xl font-bold text-primary">{strength}%</span>
+      </div>
+
+      {/* Status Text */}
+      <div className="flex-1">
+        <p className={`text-sm font-medium ${status.color}`}>{status.label}</p>
+        <p className="text-xs text-muted-foreground">{status.tip}</p>
+      </div>
+    </div>
+  );
+})()}
+
+                </div>
+
+                <Button variant="outline" size="sm" className="w-full rounded-xl" asChild>
+                  <Link href="/student/profile">Update Profile</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Quick Links</CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-2">
+                <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
+                  <Link href="/student/profile">Edit Profile</Link>
+                </Button>
+
+                <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
+                  {/* <Link href="/student/earnings">View Earnings</Link> */}
+                </Button>
+
+                <Button variant="ghost" className="w-full justify-start rounded-xl" asChild>
+                  <Link href="/student/settings">Notifications</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+
+
+
+{/* OFFER DETAILS MODAL */}
+<Dialog open={!!selectedOffer && !confirmAction} onOpenChange={() => setSelectedOffer(null)}>
+  <DialogContent className="rounded-2xl max-w-lg max-h-[80vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Offer Details</DialogTitle>
+      <DialogDescription>
+        Review the full details of this offer.
+      </DialogDescription>
+    </DialogHeader>
+
+   {selectedOffer && (
+  <div className="space-y-4">
+
+    {/* TASK SECTION */}
+    <div className="bg-muted/50 p-4 rounded-xl space-y-2">
+      <p className="text-xs text-muted-foreground">Task</p>
+      <p className="font-semibold">{selectedOffer.task?.title}</p>
+
+      {selectedOffer.task?.short_description && (
+        <>
+          <p className="text-xs text-muted-foreground mt-3">Description</p>
+          <p className="text-sm">{selectedOffer.task.short_description}</p>
+        </>
+      )}
+
+      {selectedOffer.task?.full_brief && (
+        <>
+          <p className="text-xs text-muted-foreground mt-3">Full Brief</p>
+          <p className="text-sm whitespace-pre-wrap">
+            {selectedOffer.task.full_brief}
+          </p>
+        </>
+      )}
+    </div>
+
+    {/* ORGANIZATION */}
+    <div className="bg-muted/50 p-4 rounded-xl space-y-2">
+      <p className="text-xs text-muted-foreground">Organization</p>
+      <p className="font-medium">
+        {selectedOffer.organization?.company_name}
+      </p>
+    </div>
+
+    {/* SALARY + DATES */}
+    <div className="bg-muted/50 p-4 rounded-xl space-y-2">
+      <p className="text-xs text-muted-foreground">Salary</p>
+      <p className="font-semibold text-primary">₹{selectedOffer.salary}</p>
+
+      <p className="text-xs text-muted-foreground mt-3">Start Date</p>
+      <p>{new Date(selectedOffer.start_date).toLocaleDateString()}</p>
+
+      <p className="text-xs text-muted-foreground mt-3">Sent On</p>
+      <p>
+        {selectedOffer.sent_at
+          ? new Date(selectedOffer.sent_at).toLocaleString()
+          : "-"}
+      </p>
+    </div>
+
+  </div>
+)}
+
+
+    <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+      <Button
+        variant="outline"
+        onClick={() => setSelectedOffer(null)}
+        className="rounded-xl w-full sm:w-auto"
+      >
+        Close
+      </Button>
+
+      <Button
+        variant="outline"
+        className="rounded-xl w-full sm:w-auto"
+        onClick={() => setConfirmAction("decline")}
+      >
+        Decline
+      </Button>
+
+      <Button
+        className="rounded-xl w-full sm:w-auto"
+        onClick={() => setConfirmAction("accept")}
+      >
+        Accept
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
+
+
+
+
+
+
+
+
+      {/* CONFIRMATION DIALOG */}
+{/* CONFIRMATION DIALOG */}
+<Dialog
+  open={!!confirmAction}
+  onOpenChange={() => {
+    setConfirmAction(null);
+    setSelectedOffer(null);
+  }}
+>
+  <DialogContent className="rounded-2xl max-w-lg max-h-[80vh] overflow-y-auto p-0">
+    <DialogHeader className="px-6 pt-6">
+      <DialogTitle className="text-xl font-semibold">
+        {confirmAction === "accept" ? "Accept this offer?" : "Decline this offer?"}
+      </DialogTitle>
+      <DialogDescription className="text-sm text-muted-foreground">
+        {confirmAction === "accept"
+          ? "Please review the key details carefully before accepting. Once you accept, the organization and admin will be notified."
+          : "If you decline, the organization and admin will be notified and this slot may be offered to another student."}
+      </DialogDescription>
+    </DialogHeader>
+
+    {selectedOffer && (
+      <div className="px-6 py-4 space-y-4">
+
+        {/* TASK OVERVIEW */}
+        <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
+          <p className="text-xs text-muted-foreground">Role / Task</p>
+          <p className="font-medium">
+            {selectedOffer.task?.title || "Untitled Task"}
+          </p>
+
+          {selectedOffer.task?.short_description && (
+            <p className="text-sm text-muted-foreground">
+              {selectedOffer.task.short_description}
+            </p>
+          )}
+        </div>
+
+        {/* ORG + LOCATION + BASIC META */}
+        <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-3">
+          <div>
+            <p className="text-xs text-muted-foreground">Organization</p>
+            <p className="text-sm font-medium">
+              {selectedOffer.organization?.company_name || "Unknown Organization"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-muted-foreground">Weekly Hours</p>
+              <p className="font-medium">
+                {selectedOffer.task?.weekly_hours
+                  ? `${selectedOffer.task.weekly_hours} hrs/week`
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Duration</p>
+              <p className="font-medium">
+                {selectedOffer.task?.duration_weeks
+                  ? `${selectedOffer.task.duration_weeks} weeks`
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Location</p>
+              <p className="font-medium">
+                {selectedOffer.task?.location || "-"}
+                {selectedOffer.task?.city ? ` · ${selectedOffer.task.city}` : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-muted-foreground">Positions</p>
+              <p className="font-medium">
+                {selectedOffer.task?.positions ?? "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Payroll Terms</p>
+              <p className="font-medium">
+                {selectedOffer.task?.payroll_terms || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* SKILLS */}
+        {Array.isArray(selectedOffer.task?.skills) &&
+          selectedOffer.task.skills.length > 0 && (
+            <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
+              <p className="text-xs text-muted-foreground">Key Skills</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedOffer.task.skills.map((s: string) => (
+                  <span
+                    key={s}
+                    className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* FULL BRIEF (optional, scrollable inside) */}
+        {selectedOffer.task?.full_brief && (
+          <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
+            <p className="text-xs text-muted-foreground">Full Brief</p>
+            <p className="text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
+              {selectedOffer.task.full_brief}
+            </p>
+          </div>
+        )}
+
+        {/* SALARY + DATES */}
+        <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-3">
+          <div>
+            <p className="text-xs text-muted-foreground">Total Stipend / Salary</p>
+            <p className="font-semibold text-primary">
+              {selectedOffer.salary ? `₹${selectedOffer.salary}` : "-"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-muted-foreground">Start Date</p>
+              <p>
+                {selectedOffer.start_date
+                  ? new Date(selectedOffer.start_date).toLocaleDateString()
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Offer Sent On</p>
+              <p>
+                {selectedOffer.sent_at
+                  ? new Date(selectedOffer.sent_at).toLocaleString()
+                  : "-"}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-amber-600 mt-2">
+            Note: This offer is valid for 24 hours from the time it was sent.
+          </p>
+        </div>
+
+        {/* ATTACHMENTS (if any) */}
+        {Array.isArray(selectedOffer.task?.attachment_urls) &&
+          selectedOffer.task.attachment_urls.length > 0 && (
+            <div className="bg-muted/50 rounded-xl p-4 border border-border space-y-2">
+              <p className="text-xs text-muted-foreground">Attachments</p>
+              <ul className="space-y-1 text-sm list-disc list-inside">
+                {selectedOffer.task.attachment_urls.map((url: string, idx: number) => (
+                  <li key={idx}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Attachment {idx + 1}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+      </div>
+    )}
+
+    <DialogFooter className="px-6 pb-6 flex flex-col sm:flex-row gap-3">
+      <Button
+        variant="outline"
+        className="rounded-xl w-full"
+        onClick={() => {
+          setConfirmAction(null);
+          setSelectedOffer(null);
+        }}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        variant={confirmAction === "decline" ? "destructive" : "default"}
+        className="rounded-xl w-full"
+        onClick={() => handleOfferAction(confirmAction!)}
+      >
+        {confirmAction === "accept" ? "Confirm & Accept" : "Confirm & Decline"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+    </DashboardLayout>
+  );
 }
