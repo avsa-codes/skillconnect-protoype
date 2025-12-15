@@ -1,40 +1,62 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import type { UserRole } from "@/context/auth-context";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
     const handleAuth = async () => {
-      const { data, error } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-      if (error || !data.session) {
+      if (error || !session?.user) {
         router.replace("/auth");
         return;
       }
 
-      const user = data.session.user;
+      const user = session.user;
+      const metadata = user.user_metadata || {};
 
-      // OPTIONAL (recommended): check onboarding status
-      const { data: profile } = await supabase
-        .from("students")
-        .select("onboarded")
-        .eq("id", user.id)
-        .single();
+      // 🔑 Role from URL (student by default)
+      const role =
+        (searchParams.get("role") as UserRole) || "student";
 
-      if (!profile || !profile.onboarded) {
+      // 🧠 Write metadata ONCE for Google users
+      const needsUpdate =
+        !metadata.role ||
+        metadata.profile_complete === undefined ||
+        metadata.must_change_password === undefined;
+
+      if (needsUpdate) {
+        await supabase.auth.updateUser({
+          data: {
+            role,
+            profile_complete: false,
+            must_change_password: true,
+          },
+        });
+      }
+
+      // ✅ Redirect based on role
+      if (role === "student") {
         router.replace("/student/onboarding");
+      } else if (role === "organization_user") {
+        router.replace("/org/profile");
       } else {
-        router.replace("/student/dashboard");
+        router.replace("/auth");
       }
     };
 
     handleAuth();
-  }, [router, supabase]);
+  }, [router, searchParams, supabase]);
 
-  return null; // no UI needed
+  return null;
 }

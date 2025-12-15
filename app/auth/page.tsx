@@ -22,14 +22,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 function AuthContent() {
 
-if (typeof window !== "undefined") {
-  const path = window.location.pathname;
 
-  // 🚨 ABSOLUTE STOP: OAuth is in progress
-  if (path.startsWith("/auth/callback")) {
-    return null;
-  }
-}
 
 
   const router = useRouter()
@@ -123,16 +116,41 @@ useEffect(() => {
 
 
 useEffect(() => {
-  if (!user || !isAuthenticated) return;
+  if (typeof window === "undefined") return;
 
-  // ✅ Only for Google users who don't yet have profile flags
-  if (user.role === "student" && user.profileComplete === undefined) {
-    updateProfile({
-      profileComplete: false,
-      isFirstLogin: true,
-    });
+  const path = window.location.pathname;
+
+  // 🚫 DO NOT redirect during OAuth flow
+  if (path !== "/auth") return;
+
+  if (!isAuthenticated || !user) return;
+
+  if (user.role === "admin" || user.role === "super_admin") {
+    router.push("/admin/dashboard");
+    return;
   }
-}, [user, isAuthenticated, updateProfile]);
+
+  if (user.isFirstLogin) {
+    router.push("/auth/first-login");
+    return;
+  }
+
+  if (!user.profileComplete) {
+    if (user.role === "student") {
+      router.push("/student/onboarding");
+    } else {
+      router.push("/org/profile");
+    }
+    return;
+  }
+
+  if (user.role === "student") {
+    router.push("/student/dashboard");
+  } else if (user.role === "organization_user") {
+    router.push("/org/dashboard");
+  }
+}, [isAuthenticated, user, router]);
+
 
 
 

@@ -229,23 +229,30 @@ useEffect(() => {
   })();
 
   // Subscribe to Supabase auth changes
-  const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-
-    // 🛑 If admin is logged in via localStorage, ignore Supabase changes
-    const adminSession =
-      typeof window !== "undefined"
-        ? localStorage.getItem("admin_session")
-        : null;
-
-    if (adminSession === "super_admin") return;
-
-    if (session?.user) {
-      const built = await buildUserFromSupabase(supabase, session.user);
-      setUser(built);
-    } else {
-      setUser(null);
+const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+  // 🚫 Do NOT hijack OAuth callback flow
+  if (typeof window !== "undefined") {
+    const path = window.location.pathname;
+    if (path.startsWith("/auth/callback")) {
+      return;
     }
-  });
+  }
+
+  const adminSession =
+    typeof window !== "undefined"
+      ? localStorage.getItem("admin_session")
+      : null;
+
+  if (adminSession === "super_admin") return;
+
+  if (session?.user) {
+    const built = await buildUserFromSupabase(supabase, session.user);
+    setUser(built);
+  } else {
+    setUser(null);
+  }
+});
+;
 
   return () => {
     mounted = false;
