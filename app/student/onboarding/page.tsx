@@ -84,7 +84,7 @@ export default function StudentOnboardingPage() {
     setStep(step + 1)
   }
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
   if (!formData.acceptTerms) {
     toast.error("Please accept the Terms & Conditions");
     return;
@@ -119,29 +119,25 @@ export default function StudentOnboardingPage() {
 
     if (!res.ok) {
       toast.error(data.error || "Failed to save profile");
-      setIsLoading(false);
       return;
     }
 
-   toast.success("Profile completed successfully!");
+    toast.success("Profile completed successfully!");
 
-// Update metadata in auth-context
-await updateProfile({ profileComplete: true });
+    // Update auth metadata
+    await updateProfile({ profileComplete: true });
 
-// 🔥 HARD REDIRECT — no race conditions
-window.location.href = "/student/dashboard";
-
-
-// ❗ DO NOT redirect here
-// Let auth state settle
-
+    // 🔥 HARD REDIRECT (correct)
+    window.location.href = "/student/dashboard";
   } catch (err) {
     console.error(err);
     toast.error("Something went wrong");
+  } finally {
+    // ✅ ALWAYS reset loading
+    setIsLoading(false);
   }
-
-  setIsLoading(false);
 };
+
 
 
   if (!user) return null
@@ -379,7 +375,10 @@ window.location.href = "/student/dashboard";
                   <Checkbox
                     id="terms"
                     checked={formData.acceptTerms}
-                    onCheckedChange={(checked) => setFormData({ ...formData, acceptTerms: checked === true })}
+                    // onCheckedChange={(checked) => setFormData({ ...formData, acceptTerms: checked === true })}
+                     onCheckedChange={(checked) =>
+    setFormData({ ...formData, acceptTerms: Boolean(checked) })
+  }
                   />
                   <Label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
                     I accept the{" "}
