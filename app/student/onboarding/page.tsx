@@ -39,6 +39,23 @@ export default function StudentOnboardingPage() {
     acceptTerms: false,
   })
 
+
+
+  useEffect(() => {
+  if (
+    user &&
+    user.role === "student" &&
+    user.profileComplete === true
+  ) {
+    router.replace("/student/dashboard");
+  }
+}, [user, router]);
+
+
+
+
+
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/auth?type=student")
@@ -111,7 +128,9 @@ export default function StudentOnboardingPage() {
     // Update metadata in auth-context
     await updateProfile({ profileComplete: true });
 
-    router.push("/student/dashboard");
+// ❗ DO NOT redirect here
+// Let auth state settle
+
   } catch (err) {
     console.error(err);
     toast.error("Something went wrong");

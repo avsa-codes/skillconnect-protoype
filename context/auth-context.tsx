@@ -562,28 +562,33 @@ const changePassword = useCallback(
 
 
         // update auth metadata
-        if (Object.keys(updates).length > 0) {
-          await supabase.auth.updateUser({ data: updates });
-        }
+//         if (Object.keys(updates).length > 0) {
+//           await supabase.auth.updateUser({ data: updates });
+//         }
 
-        // update profile table (student or org)
-        if (data.fullName) {
-          if (user.role === "student") {
-            await supabase
-              .from("student_profiles")
-              .update({ full_name: data.fullName })
-              .eq("user_id", user.id);
-          } else if (user.role === "organization_user") {
-            await supabase
-              .from("organization_profiles")
-              .update({ company_name: data.fullName })
-              .eq("user_id", user.id);
-          }
-        }
+//         // update profile table (student or org)
+//         if (data.fullName) {
+//           if (user.role === "student") {
+//             await supabase
+//               .from("student_profiles")
+//               .update({ full_name: data.fullName })
+//               .eq("user_id", user.id);
+//           } else if (user.role === "organization_user") {
+//             await supabase
+//               .from("organization_profiles")
+//               .update({ company_name: data.fullName })
+//               .eq("user_id", user.id);
+//           }
+//         }
 
-        // refresh local user
-        await supabase.auth.updateUser({ data: updates });
-await supabase.auth.refreshSession(); // 💥 forces metadata update
+//         // refresh local user
+//         await supabase.auth.updateUser({ data: updates });
+// await supabase.auth.refreshSession(); // 💥 forces metadata update
+if (Object.keys(updates).length > 0) {
+  await supabase.auth.updateUser({ data: updates });
+  await supabase.auth.refreshSession();
+}
+
 const { data: { user: refreshed } } = await supabase.auth.getUser();
 
 
