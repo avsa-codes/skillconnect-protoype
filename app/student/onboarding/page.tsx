@@ -48,6 +48,7 @@ export default function StudentOnboardingPage() {
     user.profileComplete === true
   ) {
     router.replace("/student/dashboard");
+    router.refresh();
   }
 }, [user, router]);
 
@@ -396,7 +397,7 @@ const handleSubmit = async () => {
                   <Label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
                     I accept the{" "}
                     <Link href="/terms" className="text-primary hover:underline" target="_blank">
-                      Terms & Conditions
+                      Terms & Conditions.
                     </Link>{" "}
                     
                   </Label>
