@@ -137,23 +137,33 @@ async function buildUserFromSupabase(
  * AuthProvider implementation using Supabase
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
+  
   const supabase = createSupabaseBrowserClient();
 
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  console.log("🟢 AuthProvider render", {
+  isLoading,
+  user,
+});
+
 
 
 
 
   // 🔥 SUPER IMPORTANT: If admin is logged in via admin_session → bypass Supabase
 useEffect(() => {
+  console.log("🟣 Admin session effect #1 START");
   const adminSession = typeof window !== "undefined"
     ? localStorage.getItem("admin_session")
     : null;
 
+   console.log("🟣 Admin session value:", adminSession);
+
   if (adminSession === "super_admin") {
+    console.log("🟣 Admin detected → setting user + isLoading false");
     setUser({
       id: "local-admin",
       email: "admin@local",
@@ -164,6 +174,7 @@ useEffect(() => {
     });
     setIsLoading(false);
   }
+  console.log("🟣 Admin session effect #1 END");
 }, []);
 
 
@@ -194,6 +205,8 @@ useEffect(() => {
 useEffect(() => {
   let mounted = true;
 
+  console.log("🔵 Supabase auth effect START");
+
   (async () => {
     // If admin logged in locally → skip Supabase session entirely
     const adminSession =
@@ -201,40 +214,57 @@ useEffect(() => {
         ? localStorage.getItem("admin_session")
         : null;
 
+        console.log("🔵 Admin session inside Supabase effect:", adminSession);
+
     // if (adminSession === "super_admin") {
     //   return; // ❌ Skip Supabase login check
     // }
     if (adminSession === "super_admin") {
-  if (mounted) setIsLoading(false);
+      console.log("🔵 Skipping Supabase (admin detected)");
+  if (mounted) 
+    console.log("🔵 Setting isLoading = false (admin path)");
+    setIsLoading(false);
   return;
 }
 
 
     try {
+        console.log("🔵 Calling supabase.auth.getSession()");
       const {
         data: { session },
         error,
       } = await supabase.auth.getSession();
 
+      console.log("🔵 getSession result:", {
+        session,
+        error,
+      });
+
       if (session?.user) {
+         console.log("🔵 Session user exists → building user");
         const built = await buildUserFromSupabase(supabase, session.user);
 
         if (!mounted) return;
+        console.log("🔵 Setting user from Supabase");
         setUser(built);
       } else {
+          console.log("🔵 No session user → setting user null");
         if (!mounted) return;
         setUser(null);
       }
     } catch (err) {
+
       console.error("Error fetching session on mount:", err);
     } finally {
       if (!mounted) return;
+      console.log("🔵 FINALLY → setting isLoading = false");
       setIsLoading(false);
     }
   })();
 
   // Subscribe to Supabase auth changes
 const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+   console.log("🟠 onAuthStateChange fired:", event, session);
   // 🚫 Do NOT hijack OAuth callback flow
   if (typeof window !== "undefined") {
     const path = window.location.pathname;
@@ -247,19 +277,26 @@ const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => 
     typeof window !== "undefined"
       ? localStorage.getItem("admin_session")
       : null;
+       console.log("🟠 Admin session during auth change:", adminSession);
 
-  if (adminSession === "super_admin") return;
+  if (adminSession === "super_admin"){
+    console.log("🟠 Ignoring auth change (admin)");
+return;
+  } 
 
   if (session?.user) {
+     console.log("🟠 Auth change → rebuilding user");
     const built = await buildUserFromSupabase(supabase, session.user);
     setUser(built);
   } else {
+     console.log("🟠 Auth change → user null");
     setUser(null);
   }
 });
 ;
 
   return () => {
+    console.log("🔵 Supabase auth effect CLEANUP");
     mounted = false;
     sub.subscription?.unsubscribe?.();
   };

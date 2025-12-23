@@ -76,12 +76,20 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps) {
+
+
   const { user, isLoading, logout, hasRole } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminSession, setAdminSession] = useState<string | null>(null);
+
+    console.log("📦 DashboardLayout render", {
+  isLoading,
+  user,
+  pathname,
+});
 
   /* -------- read admin session -------- */
   useEffect(() => {
@@ -96,6 +104,7 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
 
   /* -------- 1️⃣ loading -------- */
   if (isLoading) {
+    console.log("⛔ Dashboard blocked: isLoading = true");
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Loading session…</div>
