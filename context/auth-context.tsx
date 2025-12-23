@@ -194,7 +194,24 @@ useEffect(() => {
 
   // On mount: check current session & subscribe to auth changes
 // 🔥 FIX 1: Admin login via localStorage must override Supabase auth
+useEffect(() => {
+  const adminSession =
+    typeof window !== "undefined"
+      ? localStorage.getItem("admin_session")
+      : null;
 
+  if (adminSession === "super_admin") {
+    setUser({
+      id: "local-admin",
+      email: "admin@local",
+      role: "admin",
+      fullName: "Super Admin",
+      profileComplete: true,
+      isFirstLogin: false,
+    });
+    setIsLoading(false);
+  }
+}, []);
 
 // 🔥 FIX 2: Supabase auth session ONLY applies if NOT admin
 useEffect(() => {
@@ -261,25 +278,12 @@ useEffect(() => {
 const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
    console.log("🟠 onAuthStateChange fired:", event, session);
   // 🚫 Do NOT hijack OAuth callback flow
-const { data: sub } = supabase.auth.onAuthStateChange(
-  async (_event, session) => {
-    const adminSession =
-      typeof window !== "undefined"
-        ? localStorage.getItem("admin_session")
-        : null;
-
-    if (adminSession === "super_admin") return;
-
-    if (session?.user) {
-      const built = await buildUserFromSupabase(supabase, session.user);
-      setUser(built);
-      setIsLoading(false);
-    } else {
-      setUser(null);
-      setIsLoading(false);
+  if (typeof window !== "undefined") {
+    const path = window.location.pathname;
+    if (path.startsWith("/auth/callback")) {
+      return;
     }
   }
-);
 
   const adminSession =
     typeof window !== "undefined"
@@ -414,7 +418,7 @@ const signup = useCallback(
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      // const supabase = createSupabaseBrowserClient();
+      const supabase = createSupabaseBrowserClient();
 
       // 1️⃣ Create Supabase user
       const { data, error } = await supabase.auth.signUp({
@@ -517,7 +521,7 @@ const changePassword = useCallback(
     newPassword: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      // const supabase = createSupabaseBrowserClient();
+      const supabase = createSupabaseBrowserClient();
 
       if (!user?.email) {
         return { success: false, error: "User email missing" };
