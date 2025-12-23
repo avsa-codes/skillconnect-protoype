@@ -85,6 +85,17 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminSession, setAdminSession] = useState<string | null>(null);
 
+ const [forced, setForced] = useState<string | null>(null);
+
+useEffect(() => {
+  const flag = localStorage.getItem("FORCE_STUDENT_DASHBOARD");
+  if (flag === "1") {
+    localStorage.removeItem("FORCE_STUDENT_DASHBOARD");
+    setForced("1");
+  }
+}, []);
+
+
     console.log("📦 DashboardLayout render", {
   isLoading,
   user,
@@ -103,14 +114,15 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
   const isAdmin = adminSession === "super_admin";
 
   /* -------- 1️⃣ loading -------- */
-  if (isLoading) {
-    console.log("⛔ Dashboard blocked: isLoading = true");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground">Loading session…</div>
-      </div>
-    );
-  }
+ if (isLoading && !forced && !user) {
+  console.log("⛔ Dashboard blocked: isLoading = true");
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-muted-foreground">Loading session…</div>
+    </div>
+  );
+}
+
 
   /* -------- 2️⃣ not logged in -------- */
   if (!user && !isAdmin) {

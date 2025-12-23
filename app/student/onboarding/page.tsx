@@ -142,7 +142,10 @@ const handleSubmit = async () => {
     console.log("🟢 API SUCCESS");
 
     console.log("🚀 REDIRECTING NOW");
-    window.location.replace("/student/dashboard");
+    // 🔥 FORCE HANDOFF (Option B)
+localStorage.setItem("FORCE_STUDENT_DASHBOARD", "1");
+router.replace("/student/dashboard");
+
   } catch (err) {
     console.error("🔥 handleSubmit ERROR", err);
   } finally {

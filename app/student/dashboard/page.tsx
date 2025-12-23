@@ -46,7 +46,28 @@ export default function StudentDashboardPage() {
 
 const { user, isLoading } = useAuth();
 
-if (isLoading) {
+
+const router = useRouter();
+const forced =
+  typeof window !== "undefined"
+    ? localStorage.getItem("FORCE_STUDENT_DASHBOARD")
+    : null;
+
+if (forced === "1") {
+  localStorage.removeItem("FORCE_STUDENT_DASHBOARD");
+}
+
+
+// if (isLoading) {
+//   return (
+//     <DashboardLayout allowedRoles={["student"]}>
+//       <div className="p-10 text-center text-muted-foreground">
+//         Loading your dashboard…
+//       </div>
+//     </DashboardLayout>
+//   );
+// }
+if (isLoading && !forced && !user) {
   return (
     <DashboardLayout allowedRoles={["student"]}>
       <div className="p-10 text-center text-muted-foreground">
@@ -55,6 +76,7 @@ if (isLoading) {
     </DashboardLayout>
   );
 }
+
 
 if (!user) {
   return (
@@ -87,7 +109,7 @@ useEffect(() => {
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+ 
 
 
   const [selectedOffer, setSelectedOffer] = useState<any | null>(null);
