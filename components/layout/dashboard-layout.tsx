@@ -121,22 +121,7 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
   }
 
   /* -------- 4️⃣ role guard -------- */
-  if (!isAdmin && !hasRole(allowedRoles)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center max-w-md mx-auto px-4">
-          <Shield className="h-8 w-8 text-destructive mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">
-            You do not have permission to access this page.
-          </p>
-          <Button asChild>
-            <Link href="/">Go Home</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+
 
   /* -------- nav items -------- */
   const navItems: NavItem[] = isAdmin || hasRole(["admin", "super_admin"])
@@ -147,21 +132,7 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
 
   /* ------------------ UI ------------------ */
 
-  return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-            <Shield className="h-8 w-8 text-destructive" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">You do not have permission to access this page.</p>
-          <Button asChild>
-            <Link href="/">Go Home</Link>
-          </Button>
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <div className="min-h-screen bg-background">
