@@ -260,6 +260,17 @@ setCompletedTasks(tasksCompleted || []);
   //   );
   // }
 
+  if (!studentProfile) {
+  return (
+    <DashboardLayout allowedRoles={["student"]}>
+      <div className="p-10 text-center text-muted-foreground">
+        Setting up your dashboard…
+      </div>
+    </DashboardLayout>
+  );
+}
+
+
 
 
 

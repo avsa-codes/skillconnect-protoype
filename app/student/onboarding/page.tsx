@@ -398,7 +398,7 @@ const handleSubmit = async () => {
                     <Link href="/terms" className="text-primary hover:underline" target="_blank">
                       Terms & Conditions
                     </Link>{" "}
-                    and the salary cut policy (10% platform fee on earnings).
+                    
                   </Label>
                 </div>
 
