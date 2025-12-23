@@ -235,23 +235,18 @@ useEffect(() => {
         error,
       });
 
-      // if (session?.user) {
-      //    console.log("🔵 Session user exists → building user");
-      //   const built = await buildUserFromSupabase(supabase, session.user);
+      if (session?.user) {
+         console.log("🔵 Session user exists → building user");
+        const built = await buildUserFromSupabase(supabase, session.user);
 
-      //   if (!mounted) return;
-      //   console.log("🔵 Setting user from Supabase");
-      //   setUser(built);
-      // } else {
-      //     console.log("🔵 No session user → setting user null");
-      //   if (!mounted) return;
-      //   setUser(null);
-      // }
-      if (!session?.user) {
-  if (!mounted) return;
-  setUser(null);
-}
-
+        if (!mounted) return;
+        console.log("🔵 Setting user from Supabase");
+        setUser(built);
+      } else {
+          console.log("🔵 No session user → setting user null");
+        if (!mounted) return;
+        setUser(null);
+      }
     } catch (err) {
 
       console.error("Error fetching session on mount:", err);
@@ -266,12 +261,25 @@ useEffect(() => {
 const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
    console.log("🟠 onAuthStateChange fired:", event, session);
   // 🚫 Do NOT hijack OAuth callback flow
-  if (typeof window !== "undefined") {
-    const path = window.location.pathname;
-    if (path.startsWith("/auth/callback")) {
-      return;
+const { data: sub } = supabase.auth.onAuthStateChange(
+  async (_event, session) => {
+    const adminSession =
+      typeof window !== "undefined"
+        ? localStorage.getItem("admin_session")
+        : null;
+
+    if (adminSession === "super_admin") return;
+
+    if (session?.user) {
+      const built = await buildUserFromSupabase(supabase, session.user);
+      setUser(built);
+      setIsLoading(false);
+    } else {
+      setUser(null);
+      setIsLoading(false);
     }
   }
+);
 
   const adminSession =
     typeof window !== "undefined"
