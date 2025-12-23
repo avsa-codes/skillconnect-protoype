@@ -201,9 +201,14 @@ useEffect(() => {
         ? localStorage.getItem("admin_session")
         : null;
 
+    // if (adminSession === "super_admin") {
+    //   return; // ❌ Skip Supabase login check
+    // }
     if (adminSession === "super_admin") {
-      return; // ❌ Skip Supabase login check
-    }
+  if (mounted) setIsLoading(false);
+  return;
+}
+
 
     try {
       const {
