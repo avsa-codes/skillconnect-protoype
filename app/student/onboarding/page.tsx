@@ -157,29 +157,34 @@ const handleSubmit = async () => {
 // router.replace("/student/dashboard");
 
 
-//LATEST CHANGE
-console.log("🟢 API SUCCESS");
-
-// ✅ Tell user clearly what’s happening
 console.log("🟢 API SUCCESS");
 
 const supabase = createSupabaseBrowserClient();
 
-// 👉 EMAIL + PASSWORD users ONLY
-if (user?.isFirstLogin === false) {
-  toast.success("Profile completed successfully. Please log in to continue.");
+// 🔑 get fresh auth user directly from Supabase
+const {
+  data: { user: authUser },
+} = await supabase.auth.getUser();
 
-  await supabase.auth.signOut();
+const provider =
+  authUser?.app_metadata?.provider ||
+  authUser?.app_metadata?.providers?.[0];
 
-  router.replace("/auth?type=student");
-}
+console.log("🔐 Auth provider:", provider);
 
-// 👉 GOOGLE users (stay logged in)
-else {
+// ✅ GOOGLE users → dashboard
+if (provider === "google") {
   router.replace("/student/dashboard");
+  return;
 }
 
-//LATEST CHANGE
+// ✅ EMAIL + PASSWORD users → sign in again
+toast.success("Profile completed successfully. Please log in to continue.");
+
+await supabase.auth.signOut();
+
+router.replace("/auth?type=student");
+
 
   } catch (err) {
     console.error("🔥 handleSubmit ERROR", err);
