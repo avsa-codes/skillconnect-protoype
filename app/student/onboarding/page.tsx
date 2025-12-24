@@ -17,14 +17,11 @@ import { toast } from "sonner"
 import { Loader2, ArrowRight, ArrowLeft } from "lucide-react"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-
 export default function StudentOnboardingPage() {
   const router = useRouter()
   const { user, isAuthenticated, updateProfile } = useAuth()
-
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -38,8 +35,6 @@ export default function StudentOnboardingPage() {
     studentIdFile: null as File | null,
     acceptTerms: false,
   })
-
-
 
 useEffect(() => {
   if (!user) return;
@@ -60,12 +55,6 @@ useEffect(() => {
 
   checkProfile();
 }, [user, router]);
-
-
-
-
-
-
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -149,28 +138,19 @@ const handleSubmit = async () => {
       return;
     }
 
-//     console.log("🟢 API SUCCESS");
-
-//     console.log("🚀 REDIRECTING NOW");
-//     // 🔥 FORCE HANDOFF (Option B)
-// localStorage.setItem("FORCE_STUDENT_DASHBOARD", "1");
-// router.replace("/student/dashboard");
-
-
 console.log("🟢 API SUCCESS");
 
 const supabase = createSupabaseBrowserClient();
 
 // 🔑 get fresh auth user directly from Supabase
-const {
-  data: { user: authUser },
-} = await supabase.auth.getUser();
-
 const provider =
-  authUser?.app_metadata?.provider ||
-  authUser?.app_metadata?.providers?.[0];
+  (user as any)?.app_metadata?.provider ||
+  (user as any)?.app_metadata?.providers?.[0];
 
 console.log("🔐 Auth provider:", provider);
+
+
+
 
 // ✅ GOOGLE users → dashboard
 if (provider === "google") {
@@ -193,9 +173,6 @@ router.replace("/auth?type=student");
     setIsLoading(false);
   }
 };
-
-
-
 
   // if (!user) return null
 if (!user && !isLoading) return null
