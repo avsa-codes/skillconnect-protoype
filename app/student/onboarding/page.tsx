@@ -143,14 +143,15 @@ console.log("🟢 API SUCCESS");
 const supabase = createSupabaseBrowserClient();
 
 // 🔑 get fresh auth user directly from Supabase
+const {
+  data: { user: authUser },
+} = await supabase.auth.getUser();
+
 const provider =
-  (user as any)?.app_metadata?.provider ||
-  (user as any)?.app_metadata?.providers?.[0];
+  authUser?.app_metadata?.provider ||
+  authUser?.app_metadata?.providers?.[0];
 
 console.log("🔐 Auth provider:", provider);
-
-
-
 
 // ✅ GOOGLE users → dashboard
 if (provider === "google") {
