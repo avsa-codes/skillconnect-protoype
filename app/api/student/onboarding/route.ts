@@ -62,26 +62,28 @@ export async function POST(req: Request) {
     // -------------------------------
     // 2️⃣ UPSERT DB PROFILE
     // -------------------------------
-    const { error: profileError } = await supabase
-      .from("student_profiles")
-      .upsert({
-        user_id,
-        full_name,
-        phone,
-        college,
-        city,
-        skills,
-        availability,
-        portfolio_url,
-        bio,
-        education: "",
-        rating: 0,
-        tasks_completed: 0,
-        student_id_file_url,
-        resume_url: null,
-        profile_strength: 80,
-        updated_at: new Date().toISOString(),
-      });
+   const { error: profileError } = await supabase
+  .from("student_profiles")
+  .upsert({
+    user_id,
+    full_name,
+    phone,
+    college,
+    city,
+    skills,
+    availability,
+    portfolio_url,
+    bio,
+    education: "",
+    rating: 0,
+    tasks_completed: 0,
+    student_id_file_url,
+    resume_url: null,
+    profile_strength: 80,
+    profile_complete: true, // ✅ THIS IS THE KEY
+    updated_at: new Date().toISOString(),
+  });
+
 
     if (profileError) {
       console.error("PROFILE ERROR:", profileError);
@@ -91,12 +93,12 @@ export async function POST(req: Request) {
     // -------------------------------
     // 3️⃣ UPDATE AUTH METADATA
     // -------------------------------
-    await supabase.auth.admin.updateUserById(user_id, {
-      user_metadata: {
-        full_name,
-        profile_complete: true,
-      },
-    });
+    // await supabase.auth.admin.updateUserById(user_id, {
+    //   user_metadata: {
+    //     full_name,
+    //     profile_complete: true,
+    //   },
+    // });
 
     return NextResponse.json({ success: true });
   } catch (err) {

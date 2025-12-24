@@ -41,16 +41,26 @@ export default function StudentOnboardingPage() {
 
 
 
-  useEffect(() => {
-  if (
-    user &&
-    user.role === "student" &&
-    user.profileComplete === true
-  ) {
-    router.replace("/student/dashboard");
-    router.refresh();
-  }
+useEffect(() => {
+  if (!user) return;
+
+  const checkProfile = async () => {
+    const supabase = createSupabaseBrowserClient();
+
+    const { data, error } = await supabase
+      .from("student_profiles")
+      .select("profile_complete")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!error && data?.profile_complete === true) {
+      router.replace("/student/dashboard");
+    }
+  };
+
+  checkProfile();
 }, [user, router]);
+
 
 
 

@@ -135,21 +135,38 @@ useEffect(() => {
 
 
 
+useEffect(() => {
+  if (!user) return;
+
+  const loadProfile = async () => {
+    const { data: profile, error } = await supabase
+      .from("student_profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) {
+      console.error("❌ Failed to load student profile:", error);
+      router.replace("/student/onboarding");
+      return;
+    }
+
+    setStudentProfile(profile);
+  };
+
+  loadProfile();
+}, [user, router]);
+
+
   useEffect(() => {
-    if (!user) return;
+  if (!studentProfile) return;
 
-    const loadProfile = async () => {
-      const { data: profile } = await supabase
-        .from("student_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+  if (studentProfile.profile_complete !== true) {
+    console.log("🚫 Profile incomplete → redirecting to onboarding");
+    router.replace("/student/onboarding");
+  }
+}, [studentProfile]);
 
-      setStudentProfile(profile);
-    };
-
-    loadProfile();
-  }, [user]);
 
   // -----------------------------------------------------------
   // 2️⃣ UNIVERSAL DASHBOARD DATA LOADER (REUSABLE)
