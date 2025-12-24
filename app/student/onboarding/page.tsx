@@ -161,14 +161,24 @@ const handleSubmit = async () => {
 console.log("🟢 API SUCCESS");
 
 // ✅ Tell user clearly what’s happening
-toast.success("Profile completed successfully. Please log in to continue.");
+console.log("🟢 API SUCCESS");
+
 const supabase = createSupabaseBrowserClient();
 
-// ✅ Sign out ONLY this new email+password session
-await supabase.auth.signOut();
+// 👉 EMAIL + PASSWORD users ONLY
+if (user?.isFirstLogin === false) {
+  toast.success("Profile completed successfully. Please log in to continue.");
 
-// ✅ Redirect to sign-in page
-router.replace("/auth?type=student&from=onboarding");
+  await supabase.auth.signOut();
+
+  router.replace("/auth?type=student");
+}
+
+// 👉 GOOGLE users (stay logged in)
+else {
+  router.replace("/student/dashboard");
+}
+
 //LATEST CHANGE
 
   } catch (err) {
