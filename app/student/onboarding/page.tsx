@@ -137,34 +137,34 @@ const handleSubmit = async () => {
       toast.error(data.error || "Failed to save profile");
       return;
     }
-
+//Starts from here 
 console.log("🟢 API SUCCESS");
 
 const supabase = createSupabaseBrowserClient();
 
-// 🔑 get fresh auth user directly from Supabase
-const {
-  data: { user: authUser },
-} = await supabase.auth.getUser();
+// ⏳ wait until session is hydrated (email+password needs this)
+let attempts = 0;
+let session = null;
 
-const provider =
-  authUser?.app_metadata?.provider ||
-  authUser?.app_metadata?.providers?.[0];
+while (!session && attempts < 10) {
+  const { data } = await supabase.auth.getSession();
+  session = data.session;
+  if (!session) {
+    await new Promise((r) => setTimeout(r, 150));
+    attempts++;
+  }
+}
 
-console.log("🔐 Auth provider:", provider);
-
-// ✅ GOOGLE users → dashboard
-if (provider === "google") {
-  router.replace("/student/dashboard");
+if (!session) {
+  // extremely rare fallback
+  toast.error("Session not ready. Please sign in again.");
+  router.replace("/auth?type=student");
   return;
 }
 
-// ✅ EMAIL + PASSWORD users → sign in again
-toast.success("Profile completed successfully. Please log in to continue.");
+// ✅ NOW it is safe to navigate
+router.replace("/student/dashboard");
 
-await supabase.auth.signOut();
-
-router.replace("/auth?type=student");
 
 
   } catch (err) {
