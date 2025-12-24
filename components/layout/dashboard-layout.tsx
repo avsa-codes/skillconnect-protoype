@@ -131,15 +131,15 @@ useEffect(() => {
   }
 
   /* -------- 3️⃣ student onboarding guard -------- */
-  if (
-    user &&
-    user.role === "student" &&
-    user.profileComplete === false &&
-    pathname !== "/student/onboarding"
-  ) {
-    router.replace("/student/onboarding");
-    return null;
-  }
+  // if (
+  //   user &&
+  //   user.role === "student" &&
+  //   user.profileComplete === false &&
+  //   pathname !== "/student/onboarding"
+  // ) {
+  //   router.replace("/student/onboarding");
+  //   return null;
+  // }
 
   /* -------- 4️⃣ role guard -------- */
 
