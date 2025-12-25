@@ -45,6 +45,8 @@ export default function StudentDashboardPage() {
 
 
 const { user, isLoading } = useAuth();
+const [loading, setLoading] = useState(true);
+  const [studentProfile, setStudentProfile] = useState<any | null>(null);
 
 
 const router = useRouter();
@@ -56,6 +58,20 @@ const forced =
 if (forced === "1") {
   localStorage.removeItem("FORCE_STUDENT_DASHBOARD");
 }
+
+
+useEffect(() => {
+  if (!user) return;
+
+  setStudentProfile((prev: any) => {
+    if (prev) return prev; // do nothing for Google users
+    return {
+      user_id: user.id,
+      full_name: user.fullName ?? "Student",
+    };
+  });
+}, [user?.id]);
+
 
 
 // if (isLoading) {
@@ -105,10 +121,9 @@ useEffect(() => {
 }, [user]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
 
-  const [studentProfile, setStudentProfile] = useState<any | null>(null);
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
  
 
 
@@ -127,6 +142,10 @@ useEffect(() => {
   if (strength < 70) return { label: "Average profile", tip: "Complete missing sections", color: "text-yellow-500" };
   return { label: "Good profile", tip: "Reach 100% for best visibility", color: "text-green-600" };
 }
+
+//final fix 17 starts here 
+// 🔥 FORCE one guaranteed re-render after dashboard mount (email signup fix)
+
 
 
 
@@ -153,16 +172,11 @@ useEffect(() => {
     if (cancelled) return;
 
     // 🔑 ALWAYS unblock the dashboard
-    if (error || !data) {
-      console.warn("⚠️ Profile not ready yet, continuing anyway");
-      setStudentProfile({
-        user_id: user.id,
-        full_name: user.fullName ?? "Student",
-      });
-      //starts here 
-      setLoading(false);
-      return;
-    }
+if (error || !data) {
+  setLoading(false);
+  return;
+}
+
 
     setStudentProfile(data);
      setLoading(false); 
@@ -319,15 +333,6 @@ setCompletedTasks(tasksCompleted || []);
   //   );
   // }
 
-if (!studentProfile && loading) {
-  return (
-    <DashboardLayout allowedRoles={["student"]}>
-      <div className="p-10 text-center text-muted-foreground">
-        Setting up your dashboard…
-      </div>
-    </DashboardLayout>
-  );
-}
 
 
 
