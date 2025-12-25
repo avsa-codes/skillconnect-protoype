@@ -21,6 +21,9 @@ export default function StudentOnboardingPage() {
   const router = useRouter()
   const { user, isAuthenticated, updateProfile } = useAuth()
   const [step, setStep] = useState(1)
+  //Final Fix 14 starts here 
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
@@ -37,7 +40,7 @@ export default function StudentOnboardingPage() {
   })
 
 useEffect(() => {
-  if (!user) return;
+   if (!user || hasSubmitted) return;
 
   const checkProfile = async () => {
     const supabase = createSupabaseBrowserClient();
@@ -54,7 +57,7 @@ useEffect(() => {
   };
 
   checkProfile();
-}, [user, router]);
+}, [user, hasSubmitted, router]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -141,34 +144,7 @@ const handleSubmit = async () => {
 //START IS HAPPENING FROM HERE
 console.log("🟢 API SUCCESS");
 
-const supabase = createSupabaseBrowserClient();
-
-// 🔑 Get REAL Supabase user (not context user)
-const { data: userData, error: userError } = await supabase.auth.getUser();
-
-if (userError || !userData?.user) {
-  toast.error("Authentication error. Please sign in again.");
-  router.replace("/auth?type=student");
-  return;
-}
-
-const provider = userData.user.app_metadata?.provider;
-
-// 🩹 ONLY email+password users need refresh
-if (provider === "email") {
-  console.log("🟠 Email provider detected → refreshing session");
-
-  const { error } = await supabase.auth.refreshSession();
-
-  if (error) {
-    console.error("❌ Session refresh failed", error);
-    toast.error("Please sign in again");
-    router.replace("/auth?type=student");
-    return;
-  }
-}
-
-// ✅ Safe for all users
+setHasSubmitted(true);   // 🔥 prevents onboarding page from blocking itself
 router.replace("/student/dashboard");
 
 
