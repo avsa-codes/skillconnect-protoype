@@ -395,11 +395,11 @@ const handleRegister = async (e: React.FormEvent) => {
                 <TabsContent value="login">
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email or SkillConnect ID</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="text"
-                        placeholder="you@example.com or SC-XXXXX"
+                        placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
