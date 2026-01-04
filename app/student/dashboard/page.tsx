@@ -45,6 +45,12 @@ export default function StudentDashboardPage() {
 
 
 const { user, isLoading } = useAuth();
+console.log("📄 StudentDashboard render", {
+  isLoading,
+  hasUser: !!user,
+  userId: user?.id,
+});
+
 const [loading, setLoading] = useState(true);
   const [studentProfile, setStudentProfile] = useState<any | null>(null);
 
@@ -313,30 +319,6 @@ setCompletedTasks(tasksCompleted || []);
     setConfirmAction(null);
     setSelectedOffer(null);
   };
-
-
-
-
-
-
-
-  // -------------------------------------
-  // LOADING STATE
-  // -------------------------------------
-  // if (loading) {
-  //   return (
-  //     <DashboardLayout allowedRoles={["student"]}>
-  //       <div className="p-10 text-center text-muted-foreground">
-  //         Loading dashboard…
-  //       </div>
-  //     </DashboardLayout>
-  //   );
-  // }
-
-
-
-
-
 
 
   // -------------------------------------

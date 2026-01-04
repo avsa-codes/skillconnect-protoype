@@ -65,7 +65,7 @@ export default function HomePage() {
                         </div>
                         <div>
                           <p className="font-semibold">Verified companies</p>
-                          <p className="text-sm text-muted-foreground">84 trusted partners</p>
+                          <p className="text-sm text-muted-foreground">10+ trusted partners</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4">

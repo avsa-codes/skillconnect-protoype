@@ -81,6 +81,13 @@ async function buildUserFromSupabase(
   supabase: ReturnType<typeof createSupabaseBrowserClient>,
   authUser: SupabaseUser
 ): Promise<User> {
+
+    console.log("🧩 buildUserFromSupabase START", {
+    userId: authUser.id,
+    email: authUser.email,
+    metadata: authUser.user_metadata,
+  });
+
   const metadata = (authUser.user_metadata || {}) as Record<string, any>;
   const role: UserRole = (metadata.role as UserRole) || "student";
   const skillConnectId =
@@ -123,6 +130,14 @@ let profileComplete = false; // UI hint only — NOT used for routing
   } catch (e) {
     console.warn("Failed to fetch profile row:", e);
   }
+
+  console.log("🧩 buildUserFromSupabase DONE", {
+    userId: authUser.id,
+    fullName,
+    role,
+    profileComplete,
+  });
+
 
   return {
     id: authUser.id,
@@ -210,6 +225,7 @@ useEffect(() => {
   let mounted = true;
 
   console.log("🔵 Supabase auth effect START");
+  console.log("🔵 Calling supabase.auth.getSession()");
 
   (async () => {
     // If admin logged in locally → skip Supabase session entirely
@@ -240,12 +256,13 @@ useEffect(() => {
       } = await supabase.auth.getSession();
 
       console.log("🔵 getSession result:", {
-        session,
-        error,
-      });
+  hasSession: !!session,
+  userId: session?.user?.id,
+  error,
+});
 
-      if (session?.user) {
-         console.log("🔵 Session user exists → building user");
+if (session?.user) {
+  console.log("🔵 Session user exists → building user", session.user.id);
         const built = await buildUserFromSupabase(supabase, session.user);
 
         if (!mounted) return;
@@ -268,7 +285,14 @@ useEffect(() => {
 
   // Subscribe to Supabase auth changes
 const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-   console.log("🟠 onAuthStateChange fired:", event, session);
+console.log("🟠 onAuthStateChange", {
+  event,
+  hasSession: !!session,
+  path: typeof window !== "undefined" ? window.location.pathname : "server",
+});
+
+
+  
   // 🚫 Do NOT hijack OAuth callback flow
   if (typeof window !== "undefined") {
     const path = window.location.pathname;

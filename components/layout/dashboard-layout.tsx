@@ -97,11 +97,13 @@ useEffect(() => {
 }, []);
 
 
-    console.log("📦 DashboardLayout render", {
+console.log("📦 DashboardLayout render", {
   isLoading,
-  user,
+  hasUser: !!user,
+  userRole: user?.role,
   pathname,
 });
+
 
   /* -------- read admin session -------- */
   useEffect(() => {
@@ -116,7 +118,11 @@ useEffect(() => {
 
   /* -------- 1️⃣ loading -------- */
  if (isLoading && !forced && !user) {
-  console.log("⛔ Dashboard blocked: isLoading = true");
+  console.log("⛔ Dashboard blocked", {
+    isLoading,
+    forced,
+    hasUser: !!user,
+  });
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-muted-foreground">Loading session…</div>
@@ -126,6 +132,12 @@ useEffect(() => {
 
 
   /* -------- 2️⃣ not logged in -------- */
+  console.log("🚨 Dashboard redirect to /auth", {
+  isLoading,
+  hasUser: !!user,
+  isAdmin,
+});
+
   if (!user && !isAdmin) {
     router.replace("/auth");
     return null;
