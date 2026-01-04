@@ -66,6 +66,7 @@ const adminNavItems: NavItem[] = [
   { href: "/admin/audit", label: "Audit Logs", icon: Shield },
   { href: "/admin/support", label: "Support", icon: MessageSquare },
   { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/completed-tasks", label: "Completed Tasks", icon: Settings },
 ];
 
 /* ------------------ LAYOUT ------------------ */
