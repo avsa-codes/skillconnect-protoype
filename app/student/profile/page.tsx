@@ -14,6 +14,8 @@ import { FileUploader } from "@/components/ui/file-uploader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
 import { mockStudents } from "@/lib/mock-data"
+import { useMemo } from "react";
+
 import { Loader2, Camera, Star, Award, Plus, Trash2 } from "lucide-react"
 
 interface Experience {
@@ -37,16 +39,34 @@ interface Certificate {
 export default function StudentProfilePage() {
 
   
-  const { user } = useAuth()
-  if (!user) return null;
+  const { user, isLoading} = useAuth()
+  console.log("👤 Profile page auth", { user, isLoading });
+
+
+if (isLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-muted-foreground">Loading profile…</div>
+    </div>
+  );
+}
+
+if (!user) {
+  return null; // layout will redirect
+}
+
 
   // const studentProfile = mockStudents[0]
   const [profile, setProfile] = useState<any>(null)
-const supabase = createSupabaseBrowserClient()
+const supabase = useMemo(
+  () => createSupabaseBrowserClient(),
+  []
+);
+
 const [showResumeUploader, setShowResumeUploader] = useState(false);
 
 
-  const [isLoading, setIsLoading] = useState(false)
+const [isSaving, setIsSaving] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 const [formData, setFormData] = useState({
@@ -55,7 +75,7 @@ const [formData, setFormData] = useState({
   phone: "",
   college: "",
   city: "",
-  skills: [],
+  skills: [] as string[],
   availability: "",
   portfolioUrl: "",
   bio: "",
@@ -267,7 +287,7 @@ function calculateProfileStrength(data: any) {
 
 const handleSave = async () => {
   if (!user) return;
-  setIsLoading(true);
+  setIsSaving(true);
 
   let avatarUrl = profile?.avatar_url || null;
 
@@ -383,7 +403,7 @@ const handleSave = async () => {
     toast.success("Profile updated successfully!");
   }
 
-  setIsLoading(false);
+  setIsSaving(false);
 };
 
 
