@@ -117,7 +117,7 @@ console.log("📦 DashboardLayout render", {
   const isAdmin = adminSession === "super_admin";
 
   /* -------- 1️⃣ loading -------- */
- if (isLoading && !forced) {
+ if (isLoading) {
   console.log("⏳ Dashboard waiting for auth", { isLoading });
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -125,9 +125,6 @@ console.log("📦 DashboardLayout render", {
     </div>
   );
 }
-
-
-
   /* -------- 2️⃣ not logged in -------- */
   console.log("🚨 Dashboard redirect to /auth", {
   isLoading,
@@ -135,7 +132,7 @@ console.log("📦 DashboardLayout render", {
   isAdmin,
 });
 
-if (!isLoading && !user && !isAdmin) {
+if (!user && !isAdmin) {
   router.replace("/auth");
   return null;
 }

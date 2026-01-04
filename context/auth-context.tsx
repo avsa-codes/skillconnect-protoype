@@ -223,54 +223,58 @@ useEffect(() => {
 // 🔥 FIX 2: Supabase auth session ONLY applies if NOT admin
 useEffect(() => {
   let isMounted = true;
-  let initialized = false;
 
-  console.log("🔵 Supabase auth effect START");
+  console.log("🔵 Auth init START");
 
+  const initAuth = async () => {
+    // 1️⃣ Read existing session ONCE
+    const { data } = await supabase.auth.getSession();
+
+    if (!isMounted) return;
+
+    if (data.session?.user) {
+      console.log("🔵 Initial session found", data.session.user.id);
+      const built = await buildUserFromSupabase(
+        supabase,
+        data.session.user
+      );
+      if (isMounted) setUser(built);
+    } else {
+      console.log("🔵 No initial session");
+      setUser(null);
+    }
+
+    // 🔓 CRITICAL: release loading here
+    if (isMounted) setIsLoading(false);
+  };
+
+  initAuth();
+
+  // 2️⃣ Subscribe to future changes
   const { data: sub } = supabase.auth.onAuthStateChange(
     async (event, session) => {
-      console.log("🟠 AUTH EVENT", {
-        event,
-        userId: session?.user?.id,
-      });
+      console.log("🟠 Auth event", event);
 
       if (!isMounted) return;
-
-      // Admin override
-      const adminSession =
-        typeof window !== "undefined"
-          ? localStorage.getItem("admin_session")
-          : null;
-
-      if (adminSession === "super_admin") {
-        if (!initialized) {
-          setIsLoading(false);
-          initialized = true;
-        }
-        return;
-      }
 
       if (session?.user) {
         const built = await buildUserFromSupabase(supabase, session.user);
         if (isMounted) setUser(built);
       } else {
-        if (isMounted) setUser(null);
-      }
-
-      // 🔑 release loading ONLY once, after first auth event
-      if (!initialized) {
-        setIsLoading(false);
-        initialized = true;
+        setUser(null);
       }
     }
   );
 
   return () => {
-    console.log("🔵 Supabase auth effect CLEANUP");
+    console.log("🔵 Auth cleanup");
     isMounted = false;
     sub.subscription.unsubscribe();
   };
 }, []);
+
+////worj main 
+
 
 
 
