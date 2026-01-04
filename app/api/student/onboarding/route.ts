@@ -91,14 +91,17 @@ export async function POST(req: Request) {
     }
 
     // -------------------------------
-    // 3️⃣ UPDATE AUTH METADATA
-    // -------------------------------
-    // await supabase.auth.admin.updateUserById(user_id, {
-    //   user_metadata: {
-    //     full_name,
-    //     profile_complete: true,
-    //   },
-    // });
+// 3️⃣ UPDATE AUTH METADATA (SYNC)
+// -------------------------------
+await supabase.auth.admin.updateUserById(user_id, {
+  user_metadata: {
+    full_name,
+    profile_complete: true,
+  },
+});
+
+
+
 
     return NextResponse.json({ success: true });
   } catch (err) {

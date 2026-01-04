@@ -138,10 +138,11 @@ console.log("📦 DashboardLayout render", {
   isAdmin,
 });
 
-  if (!user && !isAdmin) {
-    router.replace("/auth");
-    return null;
-  }
+if (!isLoading && !user && !isAdmin) {
+  router.replace("/auth");
+  return null;
+}
+
 
   /* -------- 3️⃣ student onboarding guard -------- *----------------/
   // if (
