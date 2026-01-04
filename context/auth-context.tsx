@@ -11,16 +11,13 @@ import React, {
 import { useRouter } from "next/navigation";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-// your lib file
-import type { PostgrestError } from "@supabase/supabase-js";
 
 export type UserRole =
   | "student"
   | "organization_user"
   | "admin"
   | "super_admin"
-  | "system_role"
-  ;
+  | "system_role";
 
 export interface User {
   id: string;
@@ -33,9 +30,6 @@ export interface User {
   profileComplete?: boolean;
 }
 
-/**
- * Auth context interface
- */
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -64,220 +58,124 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Utility: generate SC ID from UUID (last 6 chars)
-function generateSCIDFromUUID(userId?: string) {
-  if (!userId) {
-    // fallback: random 6 digits
-    const rand = Math.floor(100000 + Math.random() * 900000);
-    return `SC-${rand}`;
-  }
-  return `SC-${userId.replace(/-/g, "").slice(-6).toUpperCase()}`;
-}
-
-/**
- * Map supabase auth user + profile rows into our User shape
- */
 async function buildUserFromSupabase(
   supabase: ReturnType<typeof createSupabaseBrowserClient>,
   authUser: SupabaseUser
 ): Promise<User> {
-
-    console.log("🧩 buildUserFromSupabase START", {
-    userId: authUser.id,
-    email: authUser.email,
-    metadata: authUser.user_metadata,
-  });
-
   const metadata = (authUser.user_metadata || {}) as Record<string, any>;
-  const role: UserRole = (metadata.role as UserRole) || "student";
-  const skillConnectId =
-    (metadata.skillconnect_id as string) || undefined;
-  const isFirstLogin = metadata.must_change_password === true;
 
-  // 🔥 SOURCE OF TRUTH
-  // let profileComplete = metadata.profile_complete === true;
-let profileComplete = false; // UI hint only — NOT used for routing
-
-
-
+  const role: UserRole = metadata.role || "student";
 
   let fullName: string | undefined =
     metadata.full_name || metadata.name || undefined;
-  let avatarUrl: string | null = metadata.avatar_url || null;
 
-  try {
-    if (role === "student") {
-      const { data: studentProfile } = await supabase
-        .from("student_profiles")
-        .select("full_name")
-        .eq("user_id", authUser.id)
-        .maybeSingle();
-
-      if (studentProfile && !fullName) {
-        fullName = (studentProfile as any).full_name;
-      }
-    } else if (role === "organization_user") {
-      const { data: orgProfile } = await supabase
-        .from("organization_profiles")
-        .select("company_name")
-        .eq("user_id", authUser.id)
-        .maybeSingle();
-
-      if (orgProfile && !fullName) {
-        fullName = (orgProfile as any).company_name;
-      }
-    }
-  } catch (e) {
-    console.warn("Failed to fetch profile row:", e);
+  if (role === "student") {
+    const { data } = await supabase
+      .from("student_profiles")
+      .select("full_name")
+      .eq("user_id", authUser.id)
+      .maybeSingle();
+    if (data?.full_name && !fullName) fullName = data.full_name;
   }
 
-  console.log("🧩 buildUserFromSupabase DONE", {
-    userId: authUser.id,
-    fullName,
-    role,
-    profileComplete,
-  });
-
+  if (role === "organization_user") {
+    const { data } = await supabase
+      .from("organization_profiles")
+      .select("company_name")
+      .eq("user_id", authUser.id)
+      .maybeSingle();
+    if (data?.company_name && !fullName) fullName = data.company_name;
+  }
 
   return {
     id: authUser.id,
     email: authUser.email ?? "",
     fullName,
     role,
-    skillConnectId,
-    avatarUrl,
-    isFirstLogin,
-    profileComplete,
+    skillConnectId: metadata.skillconnect_id,
+    avatarUrl: metadata.avatar_url ?? null,
+    isFirstLogin: metadata.must_change_password === true,
+    profileComplete: false, // UI hint only
   };
 }
 
-
-/**
- * AuthProvider implementation using Supabase
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  
   const supabase = createSupabaseBrowserClient();
-
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  console.log("🟢 AuthProvider render", {
-  isLoading,
-  user,
-});
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
+  // 🔐 ADMIN SESSION (UNCHANGED BEHAVIOR)
+  useEffect(() => {
+    const adminSession =
+      typeof window !== "undefined"
+        ? localStorage.getItem("admin_session")
+        : null;
 
-
-
-
-  // 🔥 SUPER IMPORTANT: If admin is logged in via admin_session → bypass Supabase
-useEffect(() => {
-  console.log("🟣 Admin session effect #1 START");
-  const adminSession = typeof window !== "undefined"
-    ? localStorage.getItem("admin_session")
-    : null;
-
-   console.log("🟣 Admin session value:", adminSession);
-
-  if (adminSession === "super_admin") {
-    console.log("🟣 Admin detected → setting user + isLoading false");
-    setUser({
-      id: "local-admin",
-      email: "admin@local",
-      role: "admin",
-      fullName: "Super Admin",
-      profileComplete: true,
-      isFirstLogin: false,
-    });
-    setIsLoading(false);
-  }
-  console.log("🟣 Admin session effect #1 END");
-}, []);
-
-
-
-
-  // On mount: check current session & subscribe to auth changes
-// 🔥 FIX 1: Admin login via localStorage must override Supabase auth
-useEffect(() => {
-  const adminSession =
-    typeof window !== "undefined"
-      ? localStorage.getItem("admin_session")
-      : null;
-
-  if (adminSession === "super_admin") {
-    setUser({
-      id: "local-admin",
-      email: "admin@local",
-      role: "admin",
-      fullName: "Super Admin",
-      profileComplete: true,
-      isFirstLogin: false,
-    });
-    setIsLoading(false);
-  }
-}, []);
-
-// 🔥 FIX 2: Supabase auth session ONLY applies if NOT admin
-useEffect(() => {
-  let isMounted = true;
-
-  console.log("🔵 Auth init START");
-
-  const initAuth = async () => {
-    // 1️⃣ Read existing session ONCE
-    const { data } = await supabase.auth.getSession();
-
-    if (!isMounted) return;
-
-    if (data.session?.user) {
-      console.log("🔵 Initial session found", data.session.user.id);
-      const built = await buildUserFromSupabase(
-        supabase,
-        data.session.user
-      );
-      if (isMounted) setUser(built);
-    } else {
-      console.log("🔵 No initial session");
-      setUser(null);
+    if (adminSession === "super_admin") {
+      setUser({
+        id: "local-admin",
+        email: "admin@local",
+        role: "admin",
+        fullName: "Super Admin",
+        profileComplete: true,
+        isFirstLogin: false,
+      });
+      setIsLoading(false);
+      setInitialized(true);
     }
+  }, []);
 
-    // 🔓 CRITICAL: release loading here
-    if (isMounted) setIsLoading(false);
-  };
+  // 🔑 AUTH INITIALIZATION (SINGLE SOURCE OF TRUTH)
+  useEffect(() => {
+    if (initialized) return;
 
-  initAuth();
+    let active = true;
 
-  // 2️⃣ Subscribe to future changes
-  const { data: sub } = supabase.auth.onAuthStateChange(
-    async (event, session) => {
-      console.log("🟠 Auth event", event);
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
 
-      if (!isMounted) return;
+      if (!active) return;
 
-      if (session?.user) {
-        const built = await buildUserFromSupabase(supabase, session.user);
-        if (isMounted) setUser(built);
+      if (data.session?.user) {
+        const built = await buildUserFromSupabase(
+          supabase,
+          data.session.user
+        );
+        if (active) setUser(built);
       } else {
         setUser(null);
       }
-    }
-  );
 
-  return () => {
-    console.log("🔵 Auth cleanup");
-    isMounted = false;
-    sub.subscription.unsubscribe();
-  };
-}, []);
+      setIsLoading(false);
+      setInitialized(true);
+    };
 
-////worj main 
+    init();
 
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (!active || !initialized) return;
 
+        if (session?.user) {
+          const built = await buildUserFromSupabase(
+            supabase,
+            session.user
+          );
+          setUser(built);
+        } else {
+          setUser(null);
+        }
+      }
+    );
 
-
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [initialized, supabase]);
   // LOGIN: email + password
  const login = useCallback(
   async (

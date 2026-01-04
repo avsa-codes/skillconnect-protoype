@@ -56,27 +56,9 @@ const [loading, setLoading] = useState(true);
 
 
 const router = useRouter();
-const forced =
-  typeof window !== "undefined"
-    ? localStorage.getItem("FORCE_STUDENT_DASHBOARD")
-    : null;
-
-if (forced === "1") {
-  localStorage.removeItem("FORCE_STUDENT_DASHBOARD");
-}
 
 
-useEffect(() => {
-  if (!user) return;
 
-  setStudentProfile((prev: any) => {
-    if (prev) return prev; // do nothing for Google users
-    return {
-      user_id: user.id,
-      full_name: user.fullName ?? "Student",
-    };
-  });
-}, [user?.id]);
 
 
 
@@ -89,26 +71,10 @@ useEffect(() => {
 //     </DashboardLayout>
 //   );
 // }
-if (isLoading && !forced && !user) {
-  return (
-    <DashboardLayout allowedRoles={["student"]}>
-      <div className="p-10 text-center text-muted-foreground">
-        Loading your dashboard…
-      </div>
-    </DashboardLayout>
-  );
-}
 
 
-if (!user) {
-  return (
-    <DashboardLayout allowedRoles={["student"]}>
-      <div className="p-10 text-center text-muted-foreground">
-        Restoring session…
-      </div>
-    </DashboardLayout>
-  );
-}
+
+
 
 
 
@@ -193,7 +159,7 @@ if (error || !data) {
   return () => {
     cancelled = true;
   };
-}, [user]);
+}, [user?.id]);
 
 
 
@@ -319,6 +285,18 @@ setCompletedTasks(tasksCompleted || []);
     setConfirmAction(null);
     setSelectedOffer(null);
   };
+
+
+if (!studentProfile) {
+  return (
+    <DashboardLayout allowedRoles={["student"]}>
+      <div className="p-10 text-center text-muted-foreground">
+        Loading dashboard…
+      </div>
+    </DashboardLayout>
+  );
+}
+
 
 
   // -------------------------------------

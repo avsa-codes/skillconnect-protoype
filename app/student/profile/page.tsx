@@ -194,24 +194,27 @@ const uploadCertificateImmediately = async (certId: string, file: File) => {
 
 
 
- useEffect(() => {
-  if (!user?.id) return
+useEffect(() => {
+  if (!user?.id) return;
+
+  let cancelled = false;
 
   const loadProfile = async () => {
     const { data, error } = await supabase
       .from("student_profiles")
       .select("*")
       .eq("user_id", user.id)
-      .single()
+      .single();
+
+    if (cancelled) return;
 
     if (error) {
-      console.error("Failed to fetch profile:", error)
-      return
+      console.error("Failed to fetch profile:", error);
+      return;
     }
 
-    setProfile(data)
+    setProfile(data);
 
-    // prefill form
     setFormData(prev => ({
       ...prev,
       fullName: data.full_name || "",
@@ -227,28 +230,34 @@ const uploadCertificateImmediately = async (certId: string, file: File) => {
       bankAccount: data.bank_account || "",
       ifscCode: data.ifsc_code || "",
       resumeUrl: data.resume_url || "",
-    }))
+    }));
 
     setExperiences(
-  (data.experiences || []).map((exp: any) => ({
-    ...exp,
-    isSaved: true, // mark existing ones as non-editable
-  }))
-);
+      (data.experiences || []).map((exp: any) => ({
+        ...exp,
+        isSaved: true,
+      }))
+    );
 
     setCertificates(
-  (data.certificates || []).map((cert: any) => ({
-    id: cert.id,
-    name: cert.name || "",
-    issuer: cert.issuer || "",
-    date: cert.date || "",
-    file_url: cert.file_url || "",
-    file: null, // UI upload use only
-  }))
-);
-  }
-  loadProfile()
-}, [user])
+      (data.certificates || []).map((cert: any) => ({
+        id: cert.id,
+        name: cert.name || "",
+        issuer: cert.issuer || "",
+        date: cert.date || "",
+        file_url: cert.file_url || "",
+        file: null,
+      }))
+    );
+  };
+
+  loadProfile();
+
+  return () => {
+    cancelled = true;
+  };
+}, [user?.id]); // ✅ THIS IS THE FIX
+
  
 //PROFILE STRENGTH CALCULATOR 
 function calculateProfileStrength(data: any) {
@@ -481,6 +490,17 @@ const [viewCert, setViewCert] = useState<string | null>(null);
     </div>
   </div>
 )}
+
+if (!profile) {
+  return (
+    <DashboardLayout allowedRoles={["student"]}>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Loading profile…</div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
 
 
 

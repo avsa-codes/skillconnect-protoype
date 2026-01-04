@@ -126,9 +126,7 @@ console.log("📦 DashboardLayout render", {
   );
 }
 
-if (!user && !isAdmin) {
-  return null; // wait for redirect effect
-}
+
   /* -------- 2️⃣ not logged in -------- */
 
 
@@ -136,10 +134,10 @@ useEffect(() => {
   if (isLoading) return;
 
   if (!user && !isAdmin) {
-    console.log("🚨 Layout redirect → /auth");
     router.replace("/auth");
   }
 }, [isLoading, user, isAdmin, router]);
+
 
 
 
