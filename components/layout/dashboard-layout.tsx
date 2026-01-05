@@ -154,10 +154,20 @@ useEffect(() => {
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
                   <div className="p-4 border-b">
-                    <Link href="/" className="flex items-center gap-1">
-                      <span className="text-lg font-semibold text-foreground">InstaTask</span>
-                      <span className="text-lg font-semibold text-primary">| SkillConnect</span>
-                    </Link>
+                   <Link href="/" className="flex items-center gap-1">
+  <span className="text-lg font-semibold text-foreground">InstaTask</span>
+
+  {/* Desktop / Tablet */}
+  <span className="hidden sm:inline text-lg font-semibold text-primary">
+    | SkillConnect
+  </span>
+
+  {/* Mobile */}
+  <span className="inline sm:hidden text-lg font-semibold text-primary">
+    | SC
+  </span>
+</Link>
+
                   </div>
                   <nav className="flex-1 p-4">
                     <ul className="space-y-1">
@@ -184,10 +194,20 @@ useEffect(() => {
               </SheetContent>
             </Sheet>
 
-            <Link href="/" className="flex items-center gap-1">
-              <span className="text-lg font-semibold text-foreground">InstaTask</span>
-              <span className="text-lg font-semibold text-primary">| SkillConnect</span>
-            </Link>
+           <Link href="/" className="flex items-center gap-1">
+  <span className="text-lg font-semibold text-foreground">InstaTask</span>
+
+  {/* Desktop / Tablet */}
+  <span className="hidden sm:inline text-lg font-semibold text-primary">
+    | SkillConnect
+  </span>
+
+  {/* Mobile */}
+  <span className="inline sm:hidden text-lg font-semibold text-primary">
+    | SC
+  </span>
+</Link>
+
           </div>
 
           {/* Right side */}

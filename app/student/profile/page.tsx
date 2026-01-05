@@ -1017,7 +1017,7 @@ if (!profile) {
 
 
             <div className="space-y-2">
-              <Label htmlFor="portfolioUrl">Portfolio URL</Label>
+              <Label htmlFor="portfolioUrl">Portfolio URL/Linkedin URL</Label>
               <Input
                 id="portfolioUrl"
                 type="url"

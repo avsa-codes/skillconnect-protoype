@@ -810,7 +810,7 @@ export default function OrgTasksPage() {
 
         {/* Student Profile Modal */}
         <Dialog open={showStudentModal} onOpenChange={() => { setShowStudentModal(false); setStudentProfile(null); setViewingStudentForTask(null); }}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Student Profile</DialogTitle>
               <DialogDescription>

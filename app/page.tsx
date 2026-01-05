@@ -48,7 +48,7 @@ export default function HomePage() {
               <div className="lg:pl-8">
                 <Card className="rounded-2xl shadow-lg border-0 bg-gradient-to-br from-secondary/50 to-background">
                   <CardContent className="p-8">
-                    <h2 className="text-xl font-bold mb-6">Why join SkillConnect</h2>
+                    <h2 className="text-xl font-bold mb-6">Why join SkillConnect ?</h2>
                     <div className="space-y-5">
                       <div className="flex items-start gap-4">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">

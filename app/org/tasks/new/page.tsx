@@ -436,7 +436,7 @@ export default function NewTaskPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                      <SelectItem value="bi-weekly">Monthly</SelectItem>
                       <SelectItem value="end-of-task">End of Task</SelectItem>
                     </SelectContent>
                   </Select>
