@@ -41,13 +41,11 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
 }
-
 const studentNavItems: NavItem[] = [
   { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/student/profile", label: "Profile", icon: User },
   { href: "/student/settings", label: "Settings", icon: Settings },
 ];
-
 const orgNavItems: NavItem[] = [
   { href: "/org/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/org/tasks", label: "Tasks", icon: ClipboardList },
@@ -77,15 +75,11 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps) {
-
-
   const { user, isLoading, logout, hasRole } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminSession, setAdminSession] = useState<string | null>(null);
-
  const [forced, setForced] = useState<string | null>(null);
 
 useEffect(() => {
@@ -96,14 +90,12 @@ useEffect(() => {
   }
 }, []);
 
-
 console.log("📦 DashboardLayout render", {
   isLoading,
   hasUser: !!user,
   userRole: user?.role,
   pathname,
 });
-
 
   /* -------- read admin session -------- */
   useEffect(() => {
@@ -116,19 +108,8 @@ console.log("📦 DashboardLayout render", {
 
   const isAdmin = adminSession === "super_admin";
 
-  /* -------- 1️⃣ loading -------- */
- if (isLoading) {
-  console.log("⏳ Dashboard waiting for auth", { isLoading });
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-muted-foreground">Loading session…</div>
-    </div>
-  );
-}
-
-
-  /* -------- 2️⃣ not logged in -------- */
-
+    /* -------- 2️⃣ not logged in -------- */
+//redirect guard //
 
 useEffect(() => {
   if (isLoading) return;
@@ -138,23 +119,15 @@ useEffect(() => {
   }
 }, [isLoading, user, isAdmin, router]);
 
-
-
-
-  /* -------- 3️⃣ student onboarding guard -------- *----------------/
-  // if (
-  //   user &&
-  //   user.role === "student" &&
-  //   user.profileComplete === false &&
-  //   pathname !== "/student/onboarding"
-  // ) {
-  //   router.replace("/student/onboarding");
-  //   return null;
-  // }
-
-  /* -------- 4️⃣ role guard -------- */
-
-
+  /* -------- 1️⃣ loading -------- */
+ if (isLoading) {
+  console.log("⏳ Dashboard waiting for auth", { isLoading });
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-muted-foreground">Loading session…</div>
+    </div>
+  );
+}
   /* -------- nav items -------- */
   const navItems: NavItem[] = isAdmin || hasRole(["admin", "super_admin"])
     ? adminNavItems
@@ -163,9 +136,6 @@ useEffect(() => {
     : studentNavItems;
 
   /* ------------------ UI ------------------ */
-
-
-
   return (
     <div className="min-h-screen bg-background">
       {/* Top navbar */}
