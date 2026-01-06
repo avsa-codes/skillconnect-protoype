@@ -1,3 +1,9 @@
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active_Development-blue?style=for-the-badge)
+
 # SkillConnect Platform
 
 SkillConnect is a scalable web platform built to connect students with real-world tasks, internships, and short-term opportunities posted by organizations.  
@@ -38,23 +44,29 @@ This is an early but fully functional version of the product. The platform is ac
 git clone https://github.com/avsa-codes/SkillConnect-Platform.git
 cd SkillConnect-Platform
 
+```
 ## Install Dependencies
-   npm install
-
+```
+npm install
+```
 Setup environment variables
 Create a .env.local file in the root of the project:
-
+```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-
+```
 Run the development server
+```
 npm run dev
-
+```
 Then open :
+```
 http://localhost:3000
+```
 
 
-***🗺 Product Roadmap
+
+🗺 Product Roadmap
 
 The platform is under active development. Planned features include:
 
@@ -66,6 +78,26 @@ The platform is under active development. Planned features include:
 6. Smarter matching between students and tasks
 7. Verification systems for organizations and profiles
 8. Analytics dashboards
+
+
+## 📸 Product Screenshots
+
+### 🏠 Home / Landing
+![Home](./screenshots/homepage.png)
+
+### 🎓 Student Dashboard
+![Student Dashboard](./screenshots/student-dashboard.png)
+
+### 🏢 Organization Dashboard
+![Organization Dashboard](./screenshots/organization-dashboard.png)
+
+### 📋 Task Listing / Application Flow
+![Task Page](./screenshots/tasks-page.png)
+
+### 🛡️ Admin Dashboard
+![Admin Dashboard](./screenshots/admin-dashboard.png)
+
+
 
 🎯 Vision
 
