@@ -161,7 +161,6 @@ async function toggleVerification(student: any) {
 }
 
 
-
   // -------------------------------------------
   // 🔥 RENDER PAGE
   // -------------------------------------------
@@ -245,7 +244,9 @@ async function toggleVerification(student: any) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Student</TableHead>
-                    <TableHead>SC-ID</TableHead>
+                    <TableHead>Verified</TableHead>
+
+                    {/* <TableHead>SC-ID</TableHead> */}
                     <TableHead>College</TableHead>
                     <TableHead>Skills</TableHead>
                     <TableHead>Availability</TableHead>
@@ -259,7 +260,7 @@ async function toggleVerification(student: any) {
                   {filtered.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={7}
                         className="text-center py-8 text-muted-foreground"
                       >
                         No students found
@@ -283,7 +284,20 @@ async function toggleVerification(student: any) {
                         </div>
                       </TableCell>
 
-                      <TableCell>{s.skillconnect_id}</TableCell>
+                      {/* <TableCell>{s.skillconnect_id}</TableCell> */}
+                      <TableCell>
+  {s.is_verified ? (
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+      <CheckCircle className="h-3.5 w-3.5" />
+      Verified
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+      Not Verified
+    </span>
+  )}
+</TableCell>
+
                       <TableCell>{s.college || "-"}</TableCell>
 
                       <TableCell>
