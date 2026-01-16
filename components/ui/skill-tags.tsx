@@ -1,86 +1,3 @@
-// "use client"
-
-// import { useState, type KeyboardEvent } from "react"
-// import { X } from "lucide-react"
-// import { Input } from "@/components/ui/input"
-// import { cn } from "@/lib/utils"
-
-// interface SkillTagsProps {
-//   value: string[]
-//   onChange: (value: string[]) => void
-//   maxTags?: number
-//   placeholder?: string
-//   className?: string
-// }
-
-// export function SkillTags({ value, onChange, maxTags = 5, placeholder = "Add a skill...", className }: SkillTagsProps) {
-//   const [inputValue, setInputValue] = useState("")
-
-// const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-//   if (e.key === "Enter" || e.key === ",") {
-//     e.preventDefault();
-//     e.stopPropagation(); // 👈 important
-
-//     const newTag = inputValue.trim();
-
-//     if (
-//       newTag &&
-//       !value.includes(newTag) &&
-//       value.length < maxTags
-//     ) {
-//       onChange([...value, newTag]);
-//       setInputValue("");
-//     }
-//   }
-
-//   if (e.key === "Backspace" && !inputValue && value.length > 0) {
-//     onChange(value.slice(0, -1));
-//   }
-// };
-
-
-
-
-
-//   const removeTag = (tagToRemove: string) => {
-//     onChange(value.filter((tag) => tag !== tagToRemove))
-//   }
-
-//   return (
-//     <div className={cn("space-y-2", className)}>
-//       <div className="flex flex-wrap gap-2">
-//         {value.map((tag) => (
-//           <span
-//             key={tag}
-//             className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium"
-//           >
-//             {tag}
-//             <button type="button" onClick={() => removeTag(tag)} className="hover:bg-primary/20 rounded-full p-0.5">
-//               <X className="h-3 w-3" />
-//               <span className="sr-only">Remove {tag}</span>
-//             </button>
-//           </span>
-//         ))}
-//       </div>
-//       {value.length < maxTags && (
-//        <Input
-//   value={inputValue}
-//   onChange={(e) => setInputValue(e.target.value)}
-//   onKeyDownCapture={handleKeyDown}
-//   placeholder={placeholder}
-//   className="rounded-xl"
-// />
-//       )}
-//       <p className="text-xs text-muted-foreground">
-//         Press Enter or comma to add. {value.length}/{maxTags} skills
-//       </p>
-//     </div>
-//   )
-// }
-
-// export { SkillTags as SkillTagsInput }
-
-
 "use client";
 
 import { useState } from "react";
@@ -105,13 +22,30 @@ export function SkillTags({
 }: SkillTagsProps) {
   const [inputValue, setInputValue] = useState("");
 
-  const addTag = () => {
-    const newTag = inputValue.trim();
-    if (!newTag) return;
-    if (value.includes(newTag)) return;
-    if (value.length >= maxTags) return;
+  const addTagsFromInput = (rawInput: string) => {
+    if (!rawInput.trim()) return;
 
-    onChange([...value, newTag]);
+    // Split by comma
+    const parts = rawInput
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (parts.length === 0) return;
+
+    const newTags: string[] = [];
+
+    for (const tag of parts) {
+      if (value.includes(tag)) continue;
+      if (newTags.includes(tag)) continue;
+      if (value.length + newTags.length >= maxTags) break;
+      newTags.push(tag);
+    }
+
+    if (newTags.length > 0) {
+      onChange([...value, ...newTags]);
+    }
+
     setInputValue("");
   };
 
@@ -146,12 +80,21 @@ export function SkillTags({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            addTag();
+            addTagsFromInput(inputValue);
           }}
         >
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+
+              // If user types comma, auto-process
+              if (val.includes(",")) {
+                addTagsFromInput(val);
+              } else {
+                setInputValue(val);
+              }
+            }}
             placeholder={placeholder}
             className="rounded-xl"
           />
@@ -159,7 +102,7 @@ export function SkillTags({
       )}
 
       <p className="text-xs text-muted-foreground">
-        Press Enter to add. {value.length}/{maxTags} skills
+        Type skills separated by commas or press Enter. {value.length}/{maxTags} skills
       </p>
     </div>
   );
